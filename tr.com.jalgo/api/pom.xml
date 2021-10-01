@@ -46,5 +46,24 @@
 			<groupId>org.knowm.xchange</groupId>
 			<artifactId>xchange-binance</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>tr.com.jalgo</groupId>
+			<artifactId>dto</artifactId>
+		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>tr.gov.kgk.common</groupId> -->
+<!-- 			<artifactId>utils</artifactId> -->
+<!-- 			<version>0.0.1-SNAPSHOT</version> -->
+<!-- 		</dependency> -->
 	</dependencies>
+	<build>
+		<plugins>
+			<!--Should be added in only the modules that you want to run, but not 
+				in the parent pom. -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -16,6 +16,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
+		 
 		<java.version>11</java.version>
 		<org.projectlombok.version>1.18.20</org.projectlombok.version>
 		<org.springframework.security.version>5.5.2</org.springframework.security.version>
@@ -24,6 +25,7 @@
 
 	<modules>
 		<module>api</module>
+		<module>dto</module>
 	</modules>
 	<name>jalgo</name>
 	<description>Java Algorithmic Trading Project</description>
@@ -66,6 +68,11 @@
 				<artifactId>xchange-stream-binance</artifactId>
 				<version>5.0.11</version>
 			</dependency>
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>dto</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -79,24 +86,24 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
-		<plugins>
-
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-
-		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 </project>

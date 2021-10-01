@@ -6,24 +6,39 @@ import org.springframework.security.web.csrf.CsrfToken;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+ 
+
 public class JalgoResponse {
 
-	private Object data;
+	private @Getter Object data;
 
-	private HttpStatus status;
+	private @Getter @Setter HttpStatus status;
 
-	private String message;
+	private @Getter @Setter String message;
 
-	private String url;
+	private @Getter @Setter String url;
 
-	private CsrfToken csrfToken;
+	private  @Getter @Setter CsrfToken csrfToken;
 
 	public JalgoResponse() {
 
 	}
 
+	public void setError(String error) {
+		this.status=HttpStatus.INTERNAL_SERVER_ERROR;
+		this.setMessage(error);
+	}
+	
+	public void setInfo(String info) {
+		this.status=HttpStatus.OK;
+		this.setMessage(info);
+	}
+	
+	public void setData(Object data) {
+		this.status=HttpStatus.OK;
+		this.data=data;
+	}
+	
 	public JalgoResponse(HttpStatus status) {
 		this.status = status;
 	}
