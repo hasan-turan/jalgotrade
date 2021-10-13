@@ -11,6 +11,7 @@ import org.knowm.xchange.service.marketdata.MarketDataService;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -58,21 +59,10 @@ public class BinanceController {
 		return response;
 	}
 
-	/*
-	 * function sendMessage() {
-			stompClient.send("/app/hello", {}, JSON.stringify({'baseSymbol':x,'counterSymbol':y}));}
-	 * */
-	@MessageMapping("/message") 
-	/*
-	 *  stompClient = Stomp.client('ws://localhost:8080/ws');
-    	stompClient.connect({}, function (frame) {
-        stompClient.subscribe('/streaming/binance-data', function (response) {
-            showGreeting(JSON.parse(response.body).content);
-        });
-    });
-	 * */
-    @SendToUser("/streaming/stream")
-	public JalgoResponse stream(@Payload Symbol symbol)
+	 
+	@MessageMapping("/hello")
+	@SendTo("/topic/greetings")
+	public JalgoResponse stream(Symbol symbol)
 			throws IOException, InterruptedException {
 		
 		JalgoResponse response = new JalgoResponse();
