@@ -17,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.HtmlUtils;
 
+import info.bitrich.xchangestream.binance.BinanceStreamingExchange;
+import info.bitrich.xchangestream.core.StreamingExchange;
+import info.bitrich.xchangestream.core.StreamingExchangeFactory;
 import io.reactivex.disposables.Disposable;
 import tr.com.jalgo.api.JalgoResponse;
 import tr.com.jalgo.dto.Greeting;
 import tr.com.jalgo.dto.HelloMessage;
+import tr.com.jalgo.dto.Symbol;
 
 //https://www.baeldung.com/rest-vs-websockets
 //https://spring.io/guides/gs/messaging-stomp-websocket/
@@ -28,12 +32,13 @@ import tr.com.jalgo.dto.HelloMessage;
 @Controller
 public class BinanceController {
 	Exchange binance = null;
-
+	StreamingExchange binanceStream = null;
 	Disposable tickerSubscription = null;
+	
 
 	public BinanceController() {
 		binance = ExchangeFactory.INSTANCE.createExchange(BinanceExchange.class);
-
+		binanceStream = StreamingExchangeFactory.INSTANCE.createExchange(BinanceStreamingExchange.class);
 	}
 
 	@RequestMapping(value = "/binance/ticker", method = RequestMethod.GET, produces = "application/json")
@@ -58,28 +63,35 @@ public class BinanceController {
 	public Greeting greeting(HelloMessage message) throws Exception {
 		Thread.sleep(1000); // simulated delay
 		return new Greeting("Hello, " + HtmlUtils.htmlEscape(message.getName()) + "!");
+	}
 
-//		JalgoResponse response = new JalgoResponse();
-//		CurrencyPair currencyPair = new CurrencyPair(symbol.getBaseSymbol(), symbol.getCounterSymbol());
-//		// Connect to the Exchange WebSocket API. Here we use a blocking wait.
-//		StreamingExchange binanceStream  = StreamingExchangeFactory.INSTANCE.createExchange(BinanceStreamingExchange.class);
-//		binanceStream.connect().blockingAwait();
-//
-//		// Subscribe to live trades update.
-//		// @formatter:off
-//		tickerSubscription = binanceStream
-//				.getStreamingMarketDataService()
-//				.getTicker(currencyPair)
-//				.subscribe(
-//					ticker ->  {
-//						response.setData(ticker);
-//					},
-//					throwable -> {
-//						
-//						response.setError(throwable.getMessage());
-//					} 
-//				);
-//		// @formatter:on
-//		return response;
+	@MessageMapping("/stream")
+	@SendTo("/topic/streaming")
+	public JalgoResponse stream(Symbol symbol) throws Exception {
+		Thread.sleep(1000); // simulated delay
+
+		JalgoResponse response = new JalgoResponse();
+		CurrencyPair currencyPair = new CurrencyPair(symbol.getBaseSymbol(), symbol.getCounterSymbol());
+		// Connect to the Exchange WebSocket API. Here we use a blocking wait.
+
+		binanceStream.connect().blockingAwait();
+
+		// Subscribe to live trades update.
+		// @formatter:off
+		tickerSubscription = binanceStream
+				.getStreamingMarketDataService()
+				.getTicker(currencyPair)
+				.subscribe(
+					ticker ->  {
+						response.setData(ticker);
+					},
+					throwable -> {
+						
+						response.setError(throwable.getMessage());
+					} 
+				);
+		// @formatter:on
+		return response;
+
 	}
 }
