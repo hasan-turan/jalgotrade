@@ -29,7 +29,7 @@ import tr.com.jalgo.dto.SymbolPair;
 
 //https://www.baeldung.com/rest-vs-websockets
 //https://spring.io/guides/gs/messaging-stomp-websocket/
-
+///https://mkyong.com/webservices/jax-rs/restfull-java-client-with-java-net-url/
 @RestController()
 @RequestMapping(value = "/binance")
 public class BinanceController {
