@@ -28,6 +28,7 @@
 			<artifactId>spring-security-config</artifactId>
 		</dependency>
 
+		<!-- XChange -->
 		<dependency>
 			<groupId>org.knowm.xchange</groupId>
 			<artifactId>xchange-core</artifactId>
@@ -42,6 +43,16 @@
 			<groupId>org.knowm.xchange</groupId>
 			<artifactId>xchange-binance</artifactId>
 		</dependency>
+
+
+		<!-- ta4j -->
+		<dependency>
+			<groupId>org.ta4j</groupId>
+			<artifactId>ta4j-core</artifactId>
+			<version>0.14</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>tr.com.jalgo</groupId>
 			<artifactId>dto</artifactId>
@@ -65,7 +76,7 @@
 		</dependency>
 
 
- 
+
 
 	</dependencies>
 	<build>

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
  
-public class Symbol   {
+public class SymbolPair   {
 	private String baseSymbol;
 	private String counterSymbol;
 }
