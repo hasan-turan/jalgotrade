@@ -57,6 +57,7 @@ public class BinanceWsController {
 						response.setError(throwable.getMessage());
 					} 
 				);
+		
 		// @formatter:on
 		return response;
 
