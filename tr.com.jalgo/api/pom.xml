@@ -55,7 +55,7 @@
 
 		<dependency>
 			<groupId>tr.com.jalgo</groupId>
-			<artifactId>dto</artifactId>
+			<artifactId>model</artifactId>
 		</dependency>
 
 		<!-- web socket -->

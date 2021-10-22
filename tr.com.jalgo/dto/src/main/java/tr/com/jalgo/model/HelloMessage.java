@@ -1,4 +1,4 @@
-package tr.com.jalgo.dto;
+package tr.com.jalgo.model;
 
 import java.io.Serializable;
 

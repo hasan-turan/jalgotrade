@@ -1,11 +1,10 @@
-package tr.com.jalgo.dto;
+package tr.com.jalgo.model.exchange;
 
 import lombok.Data;
 
 
 @Data
- 
-public class SymbolPair   {
+public class Pair   {
 	private String baseSymbol;
 	private String counterSymbol;
 }

@@ -1,4 +1,4 @@
-package tr.com.jalgo.dto;
+package tr.com.jalgo.model.exchange;
 
 import java.util.Date;
 
@@ -6,8 +6,8 @@ import lombok.Data;
 
 @Data
 public class KlineParameter {
-	private SymbolPair symbolPair;
+	private Pair pair;
 	private Date startDate;
 	private Date endDate;
-	private String interval;
+	private EnumInterval interval;
 }

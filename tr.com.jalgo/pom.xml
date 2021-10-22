@@ -16,7 +16,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		 
+
 		<java.version>11</java.version>
 		<org.projectlombok.version>1.18.20</org.projectlombok.version>
 		<org.springframework.security.version>5.5.2</org.springframework.security.version>
@@ -26,6 +26,7 @@
 	<modules>
 		<module>api</module>
 		<module>dto</module>
+		<module>binance</module>
 	</modules>
 	<name>jalgo</name>
 	<description>Java Algorithmic Trading Project</description>
@@ -70,10 +71,18 @@
 			</dependency>
 			<dependency>
 				<groupId>tr.com.jalgo</groupId>
-				<artifactId>dto</artifactId>
+				<artifactId>model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.10</version>
+			</dependency>
 		</dependencies>
+
+
 	</dependencyManagement>
 	<dependencies>
 		<dependency>

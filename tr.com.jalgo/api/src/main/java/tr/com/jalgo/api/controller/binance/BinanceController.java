@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tr.com.jalgo.api.JalgoResponse;
-import tr.com.jalgo.dto.KlineParameter;
-import tr.com.jalgo.dto.SymbolPair;
+import tr.com.jalgo.model.KlineParameter;
+import tr.com.jalgo.model.exchange.Pair;
 
 //https://www.baeldung.com/rest-vs-websockets
 //https://spring.io/guides/gs/messaging-stomp-websocket/
@@ -52,10 +52,10 @@ public class BinanceController {
 	}
 
 	@GetMapping(value = "/ticker", produces = "application/json")
-	public JalgoResponse ticker(@RequestBody SymbolPair symbolPair) throws IOException, ParseException {
+	public JalgoResponse ticker(@RequestBody Pair pair) throws IOException, ParseException {
 		JalgoResponse response = new JalgoResponse();
 
-		CurrencyPair currencyPair = new CurrencyPair(symbolPair.getBaseSymbol(), symbolPair.getCounterSymbol());
+		CurrencyPair currencyPair = new CurrencyPair(pair.getBaseSymbol(), pair.getCounterSymbol());
 
 		MarketDataService marketDataService = exchange.getMarketDataService();
 
@@ -71,8 +71,8 @@ public class BinanceController {
 	public JalgoResponse klines(@RequestBody KlineParameter param) throws IOException, ParseException {
 		JalgoResponse response = new JalgoResponse();
 
-		CurrencyPair currencyPair = new CurrencyPair(param.getSymbolPair().getBaseSymbol(),
-				param.getSymbolPair().getCounterSymbol());
+		CurrencyPair currencyPair = new CurrencyPair(param.getPair().getBaseSymbol(),
+				param.getPair().getCounterSymbol());
 
 		SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"));
