@@ -28,21 +28,8 @@
 			<artifactId>spring-security-config</artifactId>
 		</dependency>
 
-		<!-- XChange -->
-		<dependency>
-			<groupId>org.knowm.xchange</groupId>
-			<artifactId>xchange-core</artifactId>
-		</dependency>
 
-		<dependency>
-			<groupId>org.knowm.xchange</groupId>
-			<artifactId>xchange-stream-binance</artifactId>
-		</dependency>
 
-		<dependency>
-			<groupId>org.knowm.xchange</groupId>
-			<artifactId>xchange-binance</artifactId>
-		</dependency>
 
 
 		<!-- ta4j -->
@@ -52,16 +39,7 @@
 			<version>0.14</version>
 		</dependency>
 
-
-		<dependency>
-			<groupId>tr.com.jalgo</groupId>
-			<artifactId>model</artifactId>
-		</dependency>
-
 		<!-- web socket -->
-
-
-
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-websocket</artifactId>
@@ -75,8 +53,16 @@
 			<artifactId>spring-security-messaging</artifactId>
 		</dependency>
 
+		<!-- modules -->
+		<dependency>
+			<groupId>tr.com.jalgo</groupId>
+			<artifactId>model</artifactId>
+		</dependency>
 
-
+		<dependency>
+			<groupId>tr.com.jalgo</groupId>
+			<artifactId>binance</artifactId>
+		</dependency>
 
 	</dependencies>
 	<build>

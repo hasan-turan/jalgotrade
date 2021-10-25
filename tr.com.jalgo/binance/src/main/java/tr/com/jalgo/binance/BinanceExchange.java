@@ -4,43 +4,51 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-
-import tr.com.jalgo.model.exchange.EnumInterval;
-import tr.com.jalgo.model.exchange.Exchange;
-import tr.com.jalgo.model.exchange.IExchange;
-import tr.com.jalgo.model.exchange.Pair;
-import tr.com.jalgo.model.exchange.ApiResponse;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import javax.crypto.Mac;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
+import tr.com.jalgo.model.enums.EnumHttpMethod;
+import tr.com.jalgo.model.exchange.ApiResponse;
+import tr.com.jalgo.model.exchange.CurrencyPair;
+import tr.com.jalgo.model.exchange.EnumInterval;
+import tr.com.jalgo.model.exchange.Exchange;
+import tr.com.jalgo.model.exchange.IExchange;
 
 public class BinanceExchange extends Exchange implements IExchange {
 
-	private final String url = "https://api.binance.com";
+	private final static String LIVE_API_URL = "https://api.binance.com";
+	private final static String TESTNET_API_URL = "https://testnet.binance.vision";
 
-	protected BinanceExchange(String privateKey, String secretKey) {
-		super(privateKey, secretKey);
-		// TODO Auto-generated constructor stub
+	public BinanceExchange(String apiKey, String secretKey, boolean isTestNet) {
+		super(apiKey, secretKey, isTestNet ? TESTNET_API_URL : LIVE_API_URL);
+
 	}
 
-	private ApiResponse getListenKey() throws IOException {
-
-		return makeCall("/api/v3/userDataStream", "POST", null, null, Optional.of(true), Optional.of(false));
+	private ApiResponse getListenKey() {
+		return sendRequest("/api/v3/userDataStream", EnumHttpMethod.POST, null, null, Optional.of(true),
+				Optional.of(false));
 	}
 
 	private String generateSignature(String queryStringParams, String bodyParams)
@@ -55,35 +63,34 @@ public class BinanceExchange extends Exchange implements IExchange {
 	}
 
 	@Override
-	public ApiResponse ping() throws IOException {
-		var requestUrl = this.url + "/api/v3/userDataStream";
+	public ApiResponse ping() {
+		var requestUrl = this.getUrl() + "/api/v3/userDataStream";
 		var listenKey = getListenKey();
 		Map<String, String> requestParams = new HashMap<String, String>();
 		requestParams.put("listenKey", listenKey.getData());
-
-		return makeCall(requestUrl, "PUT", requestParams, null, null, null);
+		return sendRequest(requestUrl, EnumHttpMethod.PUT, requestParams, null, null, null);
 
 	}
 
 	@Override
-	public ApiResponse ticker(Pair pair) {
+	public ApiResponse ticker(CurrencyPair pair) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ApiResponse klines(Pair symbolPair, Date startDate, Date endDate, EnumInterval interval) {
+	public ApiResponse klines(CurrencyPair symbolPair, Date startDate, Date endDate, EnumInterval interval) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private ApiResponse makeCall(String path, String method, Map<String, String> requestParams,
-			Map<String, String> headerParams, Optional<Boolean> addApikeyToHeader, Optional<Boolean> secure)
-			throws IOException {
-		CloseableHttpClient httpClient = HttpClients.createDefault();
+	private ApiResponse sendRequest(String path, EnumHttpMethod method, Map<String, String> requestParams,
+			Map<String, String> headerParams, Optional<Boolean> addApikeyToHeader, Optional<Boolean> secure) {
+
 		ApiResponse apiResponse = new ApiResponse();
+		CloseableHttpClient httpClient = HttpClients.createDefault();
 		try {
-			var requestURL = this.url + path;
+			var requestURL = this.getUrl() + path;
 			StringBuilder queryStringParams = new StringBuilder();
 			if (requestParams != null) {
 				if (requestParams.size() > 0) {
@@ -91,27 +98,43 @@ public class BinanceExchange extends Exchange implements IExchange {
 						queryStringParams.append(key + "=" + value);
 					});
 					requestURL += "?" + queryStringParams.toString();
-					if (secure.isPresent()) {
+					if (secure != null ? secure.isPresent() : false) {
 						var signature = generateSignature(queryStringParams.toString(), "");
 						requestURL += "&signature=" + signature;
 					}
 				}
 			}
 
-			HttpGet request = new HttpGet(requestURL);
+			HttpUriRequest httpUriRequest;
+			if (method == EnumHttpMethod.POST)
+				httpUriRequest = new HttpPost(requestURL);
+			if (method == EnumHttpMethod.PUT)
+				httpUriRequest = new HttpPut(requestURL);
+			else
+				httpUriRequest = new HttpGet(requestURL);
+
 			if (headerParams != null) {
+				List<NameValuePair> header = new ArrayList<NameValuePair>();
+
 				if (headerParams.size() > 0)
 					headerParams.forEach((key, value) -> {
-						request.addHeader(key, value);
+						header.add(new BasicNameValuePair(key, value));
+						// httpUriRequest.addHeader(key, value);
 					});
 
-				if (addApikeyToHeader.isPresent())
-					request.addHeader("X-MBX-APIKEY", this.getApiKey());
+				httpUriRequest.setHeaders((Header[]) header.toArray());
 			}
 
-			CloseableHttpResponse response = httpClient.execute(request);
-			apiResponse.setStatusCode(response.getStatusLine().getStatusCode());
-			apiResponse.setStatus(response.getStatusLine().getReasonPhrase());
+			if (addApikeyToHeader != null ? addApikeyToHeader.isPresent() : false)
+				httpUriRequest.addHeader("X-MBX-APIKEY", this.getApiKey());
+
+			CloseableHttpResponse response = httpClient.execute(httpUriRequest);
+			apiResponse.setCode(response.getStatusLine().getStatusCode());
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				apiResponse.setError(response.getStatusLine().getReasonPhrase());
+			} else {
+				apiResponse.setInfo(response.getStatusLine().getReasonPhrase());
+			}
 
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
@@ -121,9 +144,14 @@ public class BinanceExchange extends Exchange implements IExchange {
 			response.close();
 
 		} catch (Exception ex) {
+			apiResponse.setError(ex.getMessage());
 
 		} finally {
-			httpClient.close();
+			try {
+				httpClient.close();
+			} catch (IOException e) {
+				apiResponse.setError(e.getMessage());
+			}
 		}
 		return apiResponse;
 	}

@@ -24,8 +24,8 @@
 	</properties>
 
 	<modules>
+		<module>model</module>
 		<module>api</module>
-		<module>dto</module>
 		<module>binance</module>
 	</modules>
 	<name>jalgo</name>
@@ -69,6 +69,13 @@
 				<artifactId>xchange-stream-binance</artifactId>
 				<version>5.0.11</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.10</version>
+			</dependency>
+
 			<dependency>
 				<groupId>tr.com.jalgo</groupId>
 				<artifactId>model</artifactId>
@@ -76,10 +83,12 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>4.5.10</version>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>binance</artifactId>
+				<version>${project.version}</version>
 			</dependency>
+
+
 		</dependencies>
 
 
