@@ -25,8 +25,10 @@
 
 	<modules>
 		<module>model</module>
+		<module>utils</module>
 		<module>api</module>
 		<module>binance</module>
+
 	</modules>
 	<name>jalgo</name>
 	<description>Java Algorithmic Trading Project</description>
@@ -88,7 +90,11 @@
 				<version>${project.version}</version>
 			</dependency>
 
-
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 
 

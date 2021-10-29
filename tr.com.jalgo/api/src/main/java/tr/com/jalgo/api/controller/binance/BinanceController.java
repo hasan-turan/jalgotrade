@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import tr.com.jalgo.binance.BinanceExchange;
 import tr.com.jalgo.model.enums.EnumStatus;
 import tr.com.jalgo.model.exchange.ApiResponse;
-import tr.com.jalgo.model.exchange.CurrencyPair;
+import tr.com.jalgo.model.exchange.Currency;
 import tr.com.jalgo.model.exchange.IExchange;
 import tr.com.jalgo.model.exchange.KlineParameter;
-
+import tr.com.jalgo.model.exchange.ExchangeException;;
 //https://www.baeldung.com/rest-vs-websockets
 //https://spring.io/guides/gs/messaging-stomp-websocket/
 ///https://mkyong.com/webservices/jax-rs/restfull-java-client-with-java-net-url/
@@ -29,13 +29,18 @@ public class BinanceController {
 		exchange = new BinanceExchange(API_KEY, SECRET_KEY, true);
 	}
 
-	@GetMapping(value = { "/", "" }, produces = "application/json")
-	public ApiResponse index() throws IOException {
+	@GetMapping(value = { "/", "", "/ping" }, produces = "application/json")
+	public ApiResponse index() throws ExchangeException {
 		return exchange.ping();
 	}
 
+	@GetMapping(value = "/time", produces = "application/json")
+	public ApiResponse time() throws ExchangeException {
+		return exchange.time();
+	}
+
 	@GetMapping(value = "/ticker", produces = "application/json")
-	public ApiResponse ticker(@RequestBody CurrencyPair pair) throws IOException, ParseException {
+	public ApiResponse ticker(@RequestBody Currency pair) throws IOException, ParseException {
 		ApiResponse response = new ApiResponse();
 
 		response.setStatus(EnumStatus.OK);

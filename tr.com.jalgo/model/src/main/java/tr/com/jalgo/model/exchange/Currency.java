@@ -4,7 +4,7 @@ import lombok.Data;
 
 
 @Data
-public class CurrencyPair   {
+public class Currency   {
 	private String baseSymbol;
 	private String counterSymbol;
 }

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class KlineParameter {
-	private CurrencyPair pair;
+	private Currency pair;
 	private Date startDate;
 	private Date endDate;
 	private EnumInterval interval;
