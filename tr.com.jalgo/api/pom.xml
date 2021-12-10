@@ -9,12 +9,31 @@
 	</parent>
 	<groupId>tr.com.jalgo</groupId>
 	<artifactId>api</artifactId>
+	<packaging>war</packaging>
+
 	<dependencies>
-
-
+	<dependency>
+			<groupId>tr.com.jalgo</groupId>
+			<artifactId>service</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>tr.com.jalgo</groupId>
+			<artifactId>historicaldata</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -27,7 +46,6 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
 		</dependency>
-
 
 
 
@@ -66,12 +84,27 @@
 
 	</dependencies>
 	<build>
+
+		<finalName>jalgo</finalName>
 		<plugins>
 			<!--Should be added in only the modules that you want to run, but not 
 				in the parent pom. -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>tr.com.jalgo.api.JalgoApplication</mainClass>
+				</configuration>
+				<!-- <executions> -->
+				<!-- <execution> -->
+				<!-- <goals> -->
+				<!-- <goal>repackage</goal> -->
+				<!-- </goals> -->
+				<!-- <configuration> -->
+				<!-- <mainClass>tr.com.jalgo.api.JalgoApplication</mainClass> -->
+				<!-- </configuration> -->
+				<!-- </execution> -->
+				<!-- </executions> -->
 			</plugin>
 		</plugins>
 	</build>

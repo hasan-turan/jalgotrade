@@ -10,6 +10,11 @@
 	<groupId>tr.com.jalgo</groupId>
 	<artifactId>binance</artifactId>
 	<dependencies>
+		
+		<dependency>
+			<groupId>org.ta4j</groupId>
+			<artifactId>ta4j-core</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>tr.com.jalgo</groupId>
 			<artifactId>model</artifactId>
@@ -22,5 +27,11 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
+		</dependency>
+
+
 	</dependencies>
 </project>

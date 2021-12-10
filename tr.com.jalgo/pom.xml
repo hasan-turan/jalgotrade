@@ -7,6 +7,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.5.5</version>
+
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -16,7 +17,9 @@
 	<packaging>pom</packaging>
 
 	<properties>
-
+		<start-class>tr.com.jalgo.api.JalgoApplication</start-class>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
 		<org.projectlombok.version>1.18.20</org.projectlombok.version>
 		<org.springframework.security.version>5.5.2</org.springframework.security.version>
@@ -26,15 +29,74 @@
 	<modules>
 		<module>model</module>
 		<module>utils</module>
-		<module>api</module>
 		<module>binance</module>
-
+		<module>repository</module>
+		<module>api</module>
+		<module>historicaldata</module>
+		<module>service</module>
 	</modules>
 	<name>jalgo</name>
 	<description>Java Algorithmic Trading Project</description>
 
 	<dependencyManagement>
 		<dependencies>
+
+
+			<dependency>
+				<groupId>com.microsoft.sqlserver</groupId>
+				<artifactId>mssql-jdbc</artifactId>
+				<version>9.4.1.jre11</version>
+			</dependency>
+
+
+			<!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-jdbc -->
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-jdbc</artifactId>
+				<version>2.3.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.json</groupId>
+				<artifactId>json</artifactId>
+				<version>20211205</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>1.3.2</version>
+			</dependency>
+
+			<!-- for historical data- to make http requests -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.13</version>
+			</dependency>
+
+			<!-- ta4j- Technical Analyses -->
+			<dependency>
+				<groupId>org.ta4j</groupId>
+				<artifactId>ta4j-examples</artifactId>
+				<version>0.14</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ta4j</groupId>
+				<artifactId>ta4j-core</artifactId>
+				<version>0.14</version>
+			</dependency>
+			<!--**************************** -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>javax.websocket</groupId>
+				<artifactId>javax.websocket-api</artifactId>
+				<version>1.1</version>
+				<scope>provided</scope>
+			</dependency>
+
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-config</artifactId>
@@ -55,6 +117,22 @@
 				<artifactId>lombok</artifactId>
 				<version>${org.projectlombok.version}</version>
 			</dependency>
+
+			<!-- <dependency> -->
+			<!-- <groupId>org.springframework</groupId> -->
+			<!-- <artifactId>spring-web</artifactId> -->
+			<!-- <version>3.0.2.RELEASE</version> -->
+			<!-- </dependency> -->
+
+
+
+			<dependency>
+				<groupId>org.eclipse.persistence</groupId>
+				<artifactId>javax.persistence</artifactId>
+				<version>2.2.1</version>
+			</dependency>
+
+
 			<!-- Xchange -->
 			<dependency>
 				<groupId>org.knowm.xchange</groupId>
@@ -95,6 +173,31 @@
 				<artifactId>utils</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>ws</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>repository</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>historicaldata</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>repository</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>service</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 
 
@@ -102,7 +205,25 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+<!-- 		 <dependency> -->
+<!--             <groupId>org.springframework.boot</groupId> -->
+<!--             <artifactId>spring-boot-starter-data-jdbc</artifactId> -->
+<!--         </dependency> -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -119,15 +240,15 @@
 
 	</dependencies>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+	<!-- <build> -->
+	<!-- <pluginManagement> -->
+	<!-- <plugins> -->
+	<!-- <plugin> -->
+	<!-- <groupId>org.springframework.boot</groupId> -->
+	<!-- <artifactId>spring-boot-maven-plugin</artifactId> -->
+	<!-- </plugin> -->
+	<!-- </plugins> -->
+	<!-- </pluginManagement> -->
+	<!-- </build> -->
 
 </project>
