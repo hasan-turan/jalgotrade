@@ -37,4 +37,8 @@ public class Account extends BaseModel {
 		this.id = id;
 	}
 
+	public Account(String apiKey, String secretKey) {
+		this.apiKey = apiKey;
+		this.secretKey = secretKey;
+	}
 }

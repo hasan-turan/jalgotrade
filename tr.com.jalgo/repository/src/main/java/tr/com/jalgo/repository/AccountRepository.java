@@ -6,5 +6,5 @@ import tr.com.jalgo.model.actions.Selectable;
 import tr.com.jalgo.model.actions.Updateable;
 
 public interface AccountRepository extends Repository,Insertable<Account>,Updateable<Account>,Selectable<Account> {
-
+ 
 }

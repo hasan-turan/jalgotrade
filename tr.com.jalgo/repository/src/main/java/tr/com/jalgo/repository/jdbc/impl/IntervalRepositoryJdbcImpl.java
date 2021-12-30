@@ -10,16 +10,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import tr.com.jalgo.model.Interval;
+import tr.com.jalgo.repository.BaseRepository;
 import tr.com.jalgo.repository.IntervalRepository;
 import tr.com.jalgo.repository.jdbc.Query;
 import tr.com.jalgo.repository.jdbc.mapper.IntervalMapper;
+import tr.com.jalgo.repository.jdbc.types.TableType;
 
 @Repository("IntervalRepositoryJdbcImpl")
-public class IntervalRepositoryJdbcImpl implements IntervalRepository {
-
-	private static String TABLE_NAME = "Intervals";
+public class IntervalRepositoryJdbcImpl extends BaseRepository implements IntervalRepository {
 
 	private JdbcTemplate jdbcTemplate;
+	
+	public IntervalRepositoryJdbcImpl() {
+	 
+	}
 
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
@@ -27,18 +31,18 @@ public class IntervalRepositoryJdbcImpl implements IntervalRepository {
 	}
 
 	@Override
-	public long Add(Interval param) {
+	public long insert(Interval param) {
 		//@formatter:off
 		String SQL = "INSERT INTO "
-				  + TABLE_NAME
+				  + TableType.INTERVALS
 				  + "("
 				  + "Id,"
-				  + "Value"
+				  + "Name"
 				  + ")" 
 				  +" VALUES (?,?)";
 		return jdbcTemplate.update(SQL, 
 				param.getId(),  
-				param.getValue() 
+				param 
 			);
 		//@formatter:on
 	}
@@ -47,14 +51,14 @@ public class IntervalRepositoryJdbcImpl implements IntervalRepository {
 	public void update(Interval param) {
 		//@formatter:off
 		String SQL = "UPDATE "
-		+ TABLE_NAME
+		+ TableType.INTERVALS
 		+ " Set "
-		+ "Value=?"
+		+ "Name=?"
 		+" )" 
 		+ " WHERE Id=?";
 
 		jdbcTemplate.update(SQL, 
-				param.getValue(),
+				param,
 				param.getId());
 		//@formatter:on
 	}
@@ -62,7 +66,7 @@ public class IntervalRepositoryJdbcImpl implements IntervalRepository {
 	@Override
 	public List<Interval> findAll(Interval param) {
 		Query query = generateSelectQuery(param);
-		List<Interval> ohlcs = jdbcTemplate.query(query.getSql(), new IntervalMapper(), query.getParameters());
+		List<Interval> intervals = jdbcTemplate.query(query.getSql(), new IntervalMapper(), query.getParameters());
 
 //		List<Map<String, Object>> rows = jdbcTemplate.queryForList(query.getSql());
 //		List<Ohlc> ohlcs = new ArrayList<Ohlc>();
@@ -73,26 +77,26 @@ public class IntervalRepositoryJdbcImpl implements IntervalRepository {
 //			ohlcs.add(ohlc);
 //		}
 
-		return ohlcs;
+		return intervals;
 	}
 
 	@Override
 	public Interval find(Interval param) {
 		Query query = generateSelectQuery(param);
-		Interval ohlc = jdbcTemplate.queryForObject(query.getSql(), new IntervalMapper(), query.getParameters());
-		return ohlc;
+		Interval interval = jdbcTemplate.queryForObject(query.getSql(), new IntervalMapper(), query.getParameters());
+		return interval;
 	}
 
 	@Override
 	public Interval getById(long id) {
 		Query query = generateSelectQuery(new Interval(id));
-		Interval ohlc = jdbcTemplate.queryForObject(query.getSql(), new IntervalMapper(), query.getParameters());
-		return ohlc;
+		Interval interval = jdbcTemplate.queryForObject(query.getSql(), new IntervalMapper(), query.getParameters());
+		return interval;
 	}
 
 	private Query generateSelectQuery(Interval param) {
 
-		String SQL = "SELECT * FROM" + TABLE_NAME + " WHERE 1=1";
+		String SQL = "SELECT * FROM " + TableType.INTERVALS + " WHERE 1=1";
 		List<Object> params = new ArrayList<Object>();
 
 		if (param.getId() > 0) {
@@ -100,11 +104,17 @@ public class IntervalRepositoryJdbcImpl implements IntervalRepository {
 			params.add(param.getId());
 		}
 
-		if (param.getValue() != null) {
+		if (param != null) {
 			SQL += " AND Name=?";
-			params.add(param.getValue());
+			params.add(param);
 		}
 
 		return new Query(SQL, params.toArray());
+	}
+
+	@Override
+	public List<Interval> getAll() {
+		String SQL = "SELECT * FROM " + TableType.INTERVALS + " WHERE 1=1";
+		return jdbcTemplate.query(SQL, new IntervalMapper());
 	}
 }

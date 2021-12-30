@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name="Exchanges")
+@Table(name = "Exchanges")
 public class Exchange extends BaseModel {
 	/**
 	 * 
@@ -25,15 +25,17 @@ public class Exchange extends BaseModel {
 
 	private String name;
 
-	private String url;
+	private String liveUrl;
+	
+	private String testUrl;
 
 	private String wsUrl;
-	
+
 	private Account account;
 
-	public Exchange( String url, String wsUrl) {
-		 
-		this.url = url;
+	public Exchange(String url, String wsUrl) {
+
+		this.liveUrl = url;
 		this.wsUrl = wsUrl;
 	}
 
@@ -50,11 +52,13 @@ public class Exchange extends BaseModel {
 		this.name = name;
 	}
 
-	public Exchange(String apiKey, String secretKey, String apiUrl, String websocketUrl) {
-		 this.account.setApiKey(apiKey);
-		 this.account.setSecretKey(secretKey);
-		 this.url=apiUrl;
-		 this.wsUrl=websocketUrl;
+	public Exchange(String apiKey, String secretKey, String liveUrl, String websocketUrl) {
+		this.account = new Account(apiKey, secretKey);
+		this.liveUrl = liveUrl;
+		this.wsUrl = websocketUrl;
 	}
+	
+	
+	 
 
 }

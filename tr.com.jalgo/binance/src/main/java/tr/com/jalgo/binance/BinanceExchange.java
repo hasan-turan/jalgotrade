@@ -2,11 +2,13 @@ package tr.com.jalgo.binance;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import java.util.concurrent.Future;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.websocket.DeploymentException;
 import javax.websocket.Session;
 
 import org.apache.commons.codec.binary.Hex;
@@ -39,32 +42,37 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.com.jalgo.model.ApiResponse;
 import tr.com.jalgo.model.Candle;
 import tr.com.jalgo.model.Exchange;
 import tr.com.jalgo.model.IExchange;
-import tr.com.jalgo.model.Symbol;
+import tr.com.jalgo.model.Parity;
 import tr.com.jalgo.model.exceptions.ExchangeException;
-import tr.com.jalgo.model.exchange.ApiResponse;
 import tr.com.jalgo.model.strategies.Strategy;
 import tr.com.jalgo.model.types.HttpMethodType;
 import tr.com.jalgo.model.types.IntervalType;
-import tr.com.jalgo.model.types.StatusType;
 import tr.com.jalgo.model.types.StrategyResultType;
-import tr.com.jalgo.model.ws.MessageHandler;
-import tr.com.jalgo.model.ws.WebSocketClient;
+import tr.com.jalgo.ws.MessageHandler;
+import tr.com.jalgo.ws.WebSocketClient;
 
 @SuppressWarnings("serial")
-public class BinanceExchange extends Exchange implements IExchange   {
 
+public class BinanceExchange extends Exchange implements IExchange {
+
+	
+	
 	private final static String LIVE_API_URL = "https://api.binance.com";
 	private final static String TESTNET_API_URL = "https://testnet.binance.vision";
-	private final static String WEBSOCKET_URL = "wss://stream.binance.com:9443/ws/";
+	
+	private final static String LIVE_WEBSOCKET_URL = "wss://stream.binance.com:9443/ws/";
+	private final static String TESTNET_WEBSOCKET_URL = "wss://testnet.binance.vision/ws";
 
 	private WebSocketClient wsClient = null;
-	//private Session session = null;
+	// private Session session = null;
 
 	public BinanceExchange(String apiKey, String secretKey, boolean isTestNet) {
-		super(apiKey, secretKey, isTestNet ? TESTNET_API_URL : LIVE_API_URL, WEBSOCKET_URL);
+		super(apiKey, secretKey, isTestNet ? TESTNET_API_URL : LIVE_API_URL,
+				isTestNet ? TESTNET_WEBSOCKET_URL : LIVE_WEBSOCKET_URL);
 
 	}
 
@@ -82,153 +90,182 @@ public class BinanceExchange extends Exchange implements IExchange   {
 	@Override
 	public ApiResponse ping() throws ExchangeException {
 		var requestUrl = "/api/v3/ping";
-		return sendRequest(requestUrl, HttpMethodType.GET, null, null, null, null);
+		return sendRequest(requestUrl, HttpMethodType.GET);
 
 	}
 
 	@Override
-	public ApiResponse time() throws ExchangeException {
+	public ApiResponse getTime() throws ExchangeException {
 		var requestUrl = "/api/v3/time";
-		return sendRequest(requestUrl, HttpMethodType.GET, null, null, null, null);
+		return sendRequest(requestUrl, HttpMethodType.GET);
 
 	}
 
+	/*
+	 * "https://api.binance.com/api/v3/exchangeInfo?symbols=BTCUSDT,ETHUSDT"
+	 */
 	@Override
-	public ApiResponse exchangeInfo(String[] symbols) throws ExchangeException {
+	public ApiResponse getExchangeInfo(List<Parity> parities) throws ExchangeException {
 		var requestUrl = "/api/v3/exchangeInfo";
-		Map<String, Object> requestParams = null;
-		if (symbols != null) {
-			requestParams = new HashMap<String, Object>();
-			requestParams.put("symbols", symbols);
+		SimpleEntry<String, Object> requestParams = null;
+		if (parities != null) {
+			requestParams = new SimpleEntry<String, Object>("symbols",
+					String.join(",", parities.stream().map(parity -> getParity(parity)).toArray(String[]::new)));
 		}
 
-		return sendRequest(requestUrl, HttpMethodType.GET, requestParams, null, null, null);
+		return sendRequest(requestUrl, HttpMethodType.GET, requestParams);
 
 	}
 
 	@Override
-	public ApiResponse dept(Symbol currency, int limit) throws ExchangeException {
-		checkCurrency(currency);
-		return sendRequest("/api/v3/depth", HttpMethodType.GET, getParameters(currency, limit), null, null, null);
+	public ApiResponse getDept(Parity parity, int limit) throws ExchangeException {
+		checkParity(parity);
+
+		return sendRequest("/api/v3/depth", HttpMethodType.GET,
+				new SimpleEntry<String, Object>("symbol", getParity(parity)),
+				new SimpleEntry<String, Object>("limit", limit));
 
 	}
 
 	@Override
-	public ApiResponse trades(Symbol currency, int limit) throws ExchangeException {
-		checkCurrency(currency);
-		return sendRequest("/api/v3/trades", HttpMethodType.GET, getParameters(currency, limit), null, null, null);
+	public ApiResponse getTrades(Parity parity, int limit) throws ExchangeException {
+		checkParity(parity);
+
+		return sendRequest("/api/v3/trades", HttpMethodType.GET,
+				new SimpleEntry<String, Object>("symbol", getParity(parity)),
+				new SimpleEntry<String, Object>("limit", limit));
 	}
 
 	@Override
-	public ApiResponse historicalTrades(Symbol currency, int limit, long formId) throws ExchangeException {
-		checkCurrency(currency);
-		return sendRequest("/api/v3/trades", HttpMethodType.GET, getParameters(currency, limit, formId), null, null, null);
+	public ApiResponse getHistoricalTrades(Parity parity, int limit, long formId) throws ExchangeException {
+		checkParity(parity);
+
+		return sendRequest("/api/v3/trades", HttpMethodType.GET,
+				new SimpleEntry<String, Object>("symbol", getParity(parity)),
+				new SimpleEntry<String, Object>("limit", limit), new SimpleEntry<String, Object>("formId", formId));
 	}
 
 	@Override
-	public ApiResponse aggregateTrades(Symbol currency, int limit, Date startDate, Date endDate, long formId)
+	public ApiResponse getAggregateTrades(Parity parity, int limit, Date startDate, Date endDate, long formId)
 			throws ExchangeException {
-		checkCurrency(currency);
+		checkParity(parity);
+
 		return sendRequest("/api/v3/aggTrades", HttpMethodType.GET,
-				getParameters(currency, limit, startDate, endDate, formId), null, null, null);
+				new SimpleEntry<String, Object>("symbol", getParity(parity)),
+				new SimpleEntry<String, Object>("limit", limit),
+				new SimpleEntry<String, Object>("startTime", startDate.getTime()),
+				new SimpleEntry<String, Object>("endTime", endDate.getTime()),
+				new SimpleEntry<String, Object>("formId", formId));
 	}
 
+	/**
+	 * Default value of limit is 500
+	 */
 	@Override
-	public ApiResponse klines(Symbol currency, IntervalType interval, Date startDate, Date endDate, int limit)
+	public ApiResponse getKlines(Parity parity, IntervalType interval, Date startDate, Date endDate, int limit)
 			throws ExchangeException {
-		checkCurrency(currency);
+		checkParity(parity);
 		checkInterval(interval);
+
 		return sendRequest("/api/v3/klines", HttpMethodType.GET,
-				getParameters(currency, interval, startDate, endDate, limit), null, null, null);
+				new SimpleEntry<String, Object>("symbol", getParity(parity)),
+				new SimpleEntry<String, Object>("limit", limit),
+				new SimpleEntry<String, Object>("interval", interval.getValue()),
+				new SimpleEntry<String, Object>("startTime", startDate.getTime()),
+				new SimpleEntry<String, Object>("endTime", endDate.getTime()));
 	}
 
+	 
 	@Override
-	public void trade(Symbol symbol, IntervalType interval, List<Strategy> strategies) throws ExchangeException {
+	public void trade(Parity parity, IntervalType interval, List<Strategy> strategies) throws ExchangeException {
 
-		if (symbol == null)
-			throw new ExchangeException("Please specify a currency!");
+		if (parity == null)
+			throw new ExchangeException("Please specify a parity!");
 
-		String path = symbol.getBaseSymbol().toLowerCase() + symbol.getCounterSymbol().toLowerCase() + "@kline_"
-				+ interval.getValue();
+		String path = parity.getBaseAsset().getSymbol().toLowerCase()
+				+ parity.getCounterAsset().getSymbol().toLowerCase() + "@kline_" + interval.getValue();
 
-		wsClient = new WebSocketClient(this.getWsUrl() + path);
+		try {
+			wsClient = new WebSocketClient(this.getWsUrl() + path);
+			wsClient.addMessageHandler(new MessageHandler() {
+				@Override
+				public void handleMessage(String message) {
+					System.out.println(message);
 
-		wsClient.addMessageHandler(new MessageHandler() {
-			@Override
-			public void handleMessage(String message) {
-				System.out.println(message);
-				ObjectMapper mapper = new ObjectMapper();
-				Candle candle = new Candle();
-				ExecutorService executorService = null;
-				try {
-					JsonNode kNode = mapper.readTree(message).get("k");
+					ExecutorService executorService = null;
+					try {
+						// all exchanges returns data in different format
+						// therefore this part can not be a common method (or think about it, maybe it
+						// can)
+						Candle candle = convertJsonStringToCandle(message);
 
-//					ohlc.setStartTime(kNode.get("t").asLong());
-//					ohlc.setCloseTime(kNode.get("T").asLong());
-//					ohlc.setSymbol(kNode.get("s").asText());
-//					ohlc.setInterval(kNode.get("i").asText());
-					
-					candle.setOpen(kNode.get("o").asDouble());
-					candle.setHigh(kNode.get("h").asDouble());
-					candle.setLow(kNode.get("l").asDouble());
-					candle.setClose(kNode.get("c").asDouble());
-					candle.setVolume(kNode.get("v").asDouble());
+						List<Callable<StrategyResultType>> strategyCallables = new ArrayList<Callable<StrategyResultType>>();
 
-					List<Callable<StrategyResultType>> callables = new ArrayList<Callable<StrategyResultType>>();
-					strategies.forEach(s -> {
-						Callable<StrategyResultType> callable = new Callable<StrategyResultType>() {
+						// iterate strategies and generate a callable (thread) for each strategy
+						strategies.forEach(s -> {
+							Callable<StrategyResultType> strategyCallable = new Callable<StrategyResultType>() {
 
-							@Override
-							public StrategyResultType call() throws Exception {
+								@Override
+								public StrategyResultType call() throws Exception {
 
-								return s.test(candle, interval);
-							}
-						};
-						callables.add(callable);
-					});
+									return s.test(candle, interval);
+								}
+							};
+							strategyCallables.add(strategyCallable);
+						});
 
-					executorService = Executors.newCachedThreadPool();
-					List<Future<StrategyResultType>> strategyResults = executorService.invokeAll(callables);
+						// generate a thread pool
+						executorService = Executors.newCachedThreadPool();
 
-					
-					System.out.println("----------Results------------");
-					strategyResults.forEach(sr -> {
-						if (sr.isDone())
-							try {
-								System.out.println(sr.get().getValue());
-							} catch (InterruptedException | ExecutionException e) {
-								throw new ExchangeException(e.getMessage());
-							}
+						// invoke(run/test) all strategies
+						List<Future<StrategyResultType>> strategyResults = executorService.invokeAll(strategyCallables);
 
-					});
-					System.out.println("--------------------------------");
+						System.out.println("----------Results------------");
 
-				} catch (InterruptedException e) {
-					throw new ExchangeException(e.getMessage());
-				} catch (JsonProcessingException e) {
-					throw new ExchangeException(e.getMessage());
-				} finally {
-					if (executorService != null)
-						executorService.shutdown();
+						// iterate all strategy results
+						strategyResults.forEach(strategyResult -> {
+
+							// if strategy test/run is done
+							if (strategyResult.isDone())
+								try {
+
+									// get strategy test/run result
+									System.out.println(strategyResult.get().getValue());
+								} catch (InterruptedException | ExecutionException e) {
+									throw new ExchangeException(e.getMessage());
+								}
+
+						});
+						System.out.println("--------------------------------");
+
+					} catch (InterruptedException e) {
+						throw new ExchangeException(e.getMessage());
+					} finally {
+						if (executorService != null)
+							executorService.shutdown();
+					}
 				}
-			}
 
-			@Override
-			public void handleOnOpen(Session session) throws ExchangeException {
-				startStream();
-			}
+				@Override
+				public void handleOnOpen(Session session) throws ExchangeException {
+					startStream();
+				}
 
-			@Override
-			public void handleKeepAlive() throws ExchangeException {
-				keepAlive();
-			}
+				@Override
+				public void handleKeepAlive() throws ExchangeException {
+					keepAlive();
+				}
 
-		});
+			});
+		} catch (URISyntaxException | DeploymentException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 	}
 
 //	@Override
-//	public ApiResponse unSubscribe(List<Currency> currencies) throws ExchangeException {
+//	public ApiResponse unSubscribe(List<parity> currencies) throws ExchangeException {
 //		wsClient.onClose(wsClient.getUserSession(), null);
 //		return null;
 //	}
@@ -236,25 +273,27 @@ public class BinanceExchange extends Exchange implements IExchange   {
 	@Override
 	public ApiResponse startStream() throws ExchangeException {
 
-		ApiResponse apiResponse = sendRequest("/api/v3/userDataStream", HttpMethodType.POST, null, null, Optional.of(true),
+		ApiResponse ApiResponse = sendRequest("/api/v3/userDataStream", HttpMethodType.POST, null, Optional.of(true),
 				Optional.of(false));
 
-		if (apiResponse.getStatus() == StatusType.OK)
-			this.getAccount().setListenKey(apiResponse.getData().toString());
+		if (ApiResponse.getStatusCode() == HttpStatus.SC_ACCEPTED)
+			this.getAccount().setListenKey(ApiResponse.getData().toString());
 
-		return apiResponse;
+		return ApiResponse;
 
 	}
 
 	@Override
 	public void keepAlive() throws ExchangeException {
 		String listenKey = this.getAccount().getListenKey();
-		sendRequest("/api/v3/userDataStream", HttpMethodType.PUT, getParameters(listenKey), null, null, null);
+
+		sendRequest("/api/v3/userDataStream", HttpMethodType.PUT,
+				new SimpleEntry<String, Object>("listenKey", listenKey));
 	}
 
-	private void checkCurrency(Symbol currency) throws ExchangeException {
-		if (currency == null)
-			throw new ExchangeException("Please specify symbol");
+	private void checkParity(Parity parity) throws ExchangeException {
+		if (parity == null)
+			throw new ExchangeException("Please specify parity");
 	}
 
 	private void checkInterval(IntervalType interval) throws ExchangeException {
@@ -262,61 +301,38 @@ public class BinanceExchange extends Exchange implements IExchange   {
 			throw new ExchangeException("Please specify interval");
 	}
 
-	private Map<String, Object> getParameters(Object... parameters) {
-
-		Map<String, Object> requestParams = new HashMap<String, Object>();
-
-		if (parameters == null)
-			return requestParams;
-
-		for (Object parameter : parameters) {
-			Class<? extends Object> clazz = parameter.getClass();
-
-			if (clazz.equals(Symbol.class))
-				requestParams.put("symbol",
-						((Symbol) parameter).getBaseSymbol() + ((Symbol) parameter).getCounterSymbol());
-
-			else if (clazz.equals(Date.class) && parameter.toString() == "startDate")
-				requestParams.put("startTime", ((Date) parameter).getTime());
-
-			else if (clazz.equals(Date.class) && parameter.toString() == "endDate")
-				requestParams.put("endTime", ((Date) parameter).getTime());
-
-			else if (clazz.equals(IntervalType.class) && parameter.toString() == "interval")
-				requestParams.put("interval", IntervalType.valueOf(parameter.toString()));
-
-			else if (parameter.toString() == "formId")
-				requestParams.put("formId", parameter);
-
-			else if (parameter.toString() == "limit")
-				requestParams.put("limit", parameter);
-
-			else
-				requestParams.put(parameter.toString(), parameter);
-
-		}
-
-		return requestParams;
+	private String getParity(Parity parity) {
+		return parity.getBaseAsset().getSymbol().toUpperCase() + parity.getCounterAsset().getSymbol().toUpperCase();
 	}
 
-	private ApiResponse sendRequest(String path, HttpMethodType method, Map<String, Object> requestParams,
-			Map<String, String> headerParams, Optional<Boolean> addApikeyToHeader, Optional<Boolean> secure) {
+	@SafeVarargs
+	private ApiResponse sendRequest(String path, HttpMethodType method, SimpleEntry<String, Object>... requestParams) {
+		return sendRequest(path, method, null, null, null, requestParams);
+	}
 
-		ApiResponse apiResponse = new ApiResponse();
+	@SafeVarargs
+	private ApiResponse sendRequest(String path, HttpMethodType method, Map<String, String> headerParams,
+			Optional<Boolean> addApikeyToHeader, Optional<Boolean> secure,
+			SimpleEntry<String, Object>... requestParams) {
+
+		ApiResponse ApiResponse = new ApiResponse();
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		try {
-			var requestURL = this.getUrl() + path;
-			StringBuilder queryStringParams = new StringBuilder();
+			var requestURL = this.getLiveUrl() + path;
+			String parameters = null;
 			if (requestParams != null) {
-				if (requestParams.size() > 0) {
-					requestParams.forEach((key, value) -> {
-						queryStringParams.append(key + "=" + value.toString());
-					});
-					requestURL += "?" + queryStringParams.toString();
-					if (secure != null ? secure.isPresent() : false) {
-						var signature = generateSignature(queryStringParams.toString(), "");
-						requestURL += "&signature=" + signature;
-					}
+
+				// converting all parameters to an array like-> [key1=value1, key2=value2,....]
+				String[] parametersArray = Arrays.asList(requestParams).stream()
+						.map(param -> param.getKey() + "=" + param.getValue().toString()).toArray(String[]::new);
+
+				// converting parameter array to key1=value1&key2=value2... string
+				parameters = String.join("&", parametersArray);
+
+				requestURL += "?" + parameters;
+				if (secure != null ? secure.isPresent() : false) {
+					var signature = generateSignature(parameters, "");
+					requestURL += "&signature=" + signature;
 				}
 			}
 
@@ -344,31 +360,53 @@ public class BinanceExchange extends Exchange implements IExchange   {
 				httpUriRequest.addHeader("X-MBX-APIKEY", this.getAccount().getApiKey());
 
 			CloseableHttpResponse response = httpClient.execute(httpUriRequest);
-			apiResponse.setCode(response.getStatusLine().getStatusCode());
+			ApiResponse.setStatusCode(response.getStatusLine().getStatusCode());
 			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-				apiResponse.setError(response.getStatusLine().getReasonPhrase());
+				ApiResponse.setError(response.getStatusLine().getReasonPhrase());
 			} else {
-				apiResponse.setInfo(response.getStatusLine().getReasonPhrase());
+				ApiResponse.setInfo(response.getStatusLine().getReasonPhrase());
 			}
 
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				// return it as a String
-				apiResponse.setData(EntityUtils.toString(entity));
+				ApiResponse.setData(EntityUtils.toString(entity));
 			}
 			response.close();
 
 		} catch (Exception ex) {
-			apiResponse.setError(ex.getMessage());
+			ApiResponse.setError(ex.getMessage());
 
 		} finally {
 			try {
 				httpClient.close();
 			} catch (IOException e) {
-				apiResponse.setError(e.getMessage());
+				ApiResponse.setError(e.getMessage());
 			}
 		}
-		return apiResponse;
+		return ApiResponse;
+	}
+
+	@Override
+	public Candle convertJsonStringToCandle(String message) throws ExchangeException {
+
+		Candle candle = null;
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode kNode;
+		try {
+			kNode = mapper.readTree(message).get("k");
+			candle = new Candle();
+			candle.setOpen(kNode.get("o").asDouble());
+			candle.setHigh(kNode.get("h").asDouble());
+			candle.setLow(kNode.get("l").asDouble());
+			candle.setClose(kNode.get("c").asDouble());
+			candle.setBaseAssetVolume(kNode.get("v").asDouble());
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			throw new ExchangeException(e.getMessage());
+		}
+
+		return candle;
 	}
 
 }

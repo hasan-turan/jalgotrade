@@ -21,18 +21,21 @@ public class Candle extends BaseModel {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private DataSource dataSource;
 	private Exchange exchange;
-	private Symbol symbol;
+	private Parity parity;
 	private Interval interval;
 	private long id;
-	private long time;
+	private long startTime;
+	private long closeTime;
 	private Date date;
 	private double open;
 	private double high;
 	private double low;
 	private double close;
-	private double volume;
-	
+	private double baseAssetVolume;
+	private double counterAssetVolume;
+	 
 	public Candle(long id) {
 		this.id=id;
 	}

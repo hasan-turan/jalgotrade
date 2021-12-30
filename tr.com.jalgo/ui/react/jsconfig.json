@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true, 
+        "baseUrl": "./",
+        "paths": {
+           "@api/*" : ["./src/api/*"],
+           "@lib/*" : ["./src/lib/*"],
+           "@utils/*" : ["./src/lib/utils/*"],
+           "@css/*" : ["./src/assets/css/*"]
+          
+         }
+    }
+}
+ 

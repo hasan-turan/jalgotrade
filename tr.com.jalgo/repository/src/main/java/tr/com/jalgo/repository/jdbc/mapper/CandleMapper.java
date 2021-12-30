@@ -1,28 +1,35 @@
 package tr.com.jalgo.repository.jdbc.mapper;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
 import tr.com.jalgo.model.Candle;
+import tr.com.jalgo.model.DataSource;
+import tr.com.jalgo.model.Exchange;
 import tr.com.jalgo.model.Interval;
-import tr.com.jalgo.model.Symbol;
+import tr.com.jalgo.model.Parity;
 
-public class CandleMapper  implements RowMapper<Candle> {
+public class CandleMapper implements RowMapper<Candle> {
 
 	@Override
 	public Candle mapRow(ResultSet rs, int rowNum) throws SQLException {
-		 Candle ohlc= new Candle();
-		 ohlc.setSymbol(new Symbol(rs.getString("BaseSymbol"),rs.getString("CounterSymbol")));
-		 ohlc.setInterval(new Interval(rs.getString("Interval")));
-		 ohlc.setDate(rs.getDate("Date"));
-		 ohlc.setTime(rs.getLong("Time"));
-		 ohlc.setOpen(rs.getDouble("Open"));
-		 ohlc.setHigh(rs.getDouble("High"));
-		 ohlc.setLow(rs.getDouble("Low"));
-		 ohlc.setClose(rs.getDouble("Close"));
-		 ohlc.setVolume(rs.getDouble("Volume"));
-		 return ohlc;
+		Candle candle = new Candle();
+		candle.setDataSource(new DataSource(rs.getLong("DataSourceId")));
+		candle.setExchange(new Exchange(rs.getLong("ExchangeId")));
+		candle.setParity(new Parity(rs.getLong("ParityId")));
+		candle.setInterval(new Interval(rs.getString("IntervalId")));
+		candle.setDate(rs.getDate("Date"));
+		candle.setStartTime(rs.getLong("StartTime"));
+		candle.setCloseTime(rs.getLong("CloseTime"));
+		candle.setOpen(rs.getDouble("Open"));
+		candle.setHigh(rs.getDouble("High"));
+		candle.setLow(rs.getDouble("Low"));
+		candle.setClose(rs.getDouble("Close"));
+		candle.setBaseAssetVolume(rs.getDouble("BaseAssetVolume"));
+		candle.setCounterAssetVolume(rs.getDouble("CounterAssetVolume"));
+		return candle;
 	}
 
 }

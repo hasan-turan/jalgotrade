@@ -18,8 +18,8 @@ public class IntervalServiceImpl implements IntervalService {
 	IntervalRepository intervalRepository;
 
 	@Override
-	public long Add(Interval param) {
-		return intervalRepository.Add(param);
+	public long insert(Interval param) {
+		return intervalRepository.insert(param);
 	}
 
 	@Override
@@ -40,6 +40,11 @@ public class IntervalServiceImpl implements IntervalService {
 	@Override
 	public void update(Interval param) {
 		intervalRepository.update(param);
+	}
+
+	@Override
+	public List<Interval> getAll() {
+		return intervalRepository.getAll();
 	}
 
 }

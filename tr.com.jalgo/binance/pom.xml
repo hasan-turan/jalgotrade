@@ -10,7 +10,7 @@
 	<groupId>tr.com.jalgo</groupId>
 	<artifactId>binance</artifactId>
 	<dependencies>
-		
+
 		<dependency>
 			<groupId>org.ta4j</groupId>
 			<artifactId>ta4j-core</artifactId>
@@ -21,7 +21,11 @@
 		</dependency>
 		<dependency>
 			<groupId>tr.com.jalgo</groupId>
-			<artifactId>utils</artifactId>
+			<artifactId>ws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>tr.com.jalgo</groupId>
+			<artifactId>common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

@@ -6,11 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.AllArgsConstructor;
-import tr.com.jalgo.historical.HistoricalData;
-import tr.com.jalgo.historical.alphavantage.types.FunctionType;
-import tr.com.jalgo.model.Symbol;
-import tr.com.jalgo.model.exchange.ApiResponse;
+import tr.com.jalgo.historical.RemoteData;
+import tr.com.jalgo.model.ApiResponse;
+import tr.com.jalgo.model.Asset;
+import tr.com.jalgo.model.Parity;
 import tr.com.jalgo.model.types.IntervalType;
 
 @RestController
@@ -19,25 +18,25 @@ public class AlphaVantageController {
 
 	@Autowired
 	@Qualifier("alphaVantageData")
-	HistoricalData alphaVantage;
+	RemoteData alphaVantage;
 
 	@GetMapping(value="/intraday")
 	public ApiResponse intraday() {
-		return alphaVantage.intraday( new Symbol("BTC", "USD"), IntervalType.HISTORICAL_5min);
+		return alphaVantage.getData( new Parity( new Asset("BTC"), new Asset("USD")), IntervalType.HISTORICAL_5min);
 	}
 	
 	@GetMapping(value="/daily")
 	public ApiResponse daily() {
-		return alphaVantage.daily( new Symbol("BTC", "USD"));
+		return alphaVantage.getData( new Parity(new Asset("BTC"), new Asset("USD")),IntervalType.D1);
 	}
 	
 	@GetMapping(value="/weekly")
 	public ApiResponse weekly() {
-		return alphaVantage.weekly( new Symbol("BTC", "USD"));
+		return alphaVantage.getData( new Parity(new Asset("BTC"), new Asset("USD")),IntervalType.W1);
 	}
 	
 	@GetMapping(value="/monthly")
 	public ApiResponse monthly() {
-		return alphaVantage.monthly( new Symbol("BTC", "USD"));
+		return alphaVantage.getData( new Parity(new Asset("BTC"), new Asset("USD")),IntervalType.M1);
 	}
 }

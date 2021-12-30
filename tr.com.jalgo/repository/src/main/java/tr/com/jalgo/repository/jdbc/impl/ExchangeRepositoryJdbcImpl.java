@@ -10,16 +10,22 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import tr.com.jalgo.model.Exchange;
+import tr.com.jalgo.repository.BaseRepository;
 import tr.com.jalgo.repository.ExchangeRepository;
 import tr.com.jalgo.repository.jdbc.Query;
 import tr.com.jalgo.repository.jdbc.mapper.ExchangeMapper;
+import tr.com.jalgo.repository.jdbc.types.TableType;
 
 @Repository("ExchangeRepositoryJdbcImpl")
-public class ExchangeRepositoryJdbcImpl implements ExchangeRepository {
-
-	private static String TABLE_NAME = "Exchanges";
+public class ExchangeRepositoryJdbcImpl extends BaseRepository implements ExchangeRepository {
 
 	private JdbcTemplate jdbcTemplate;
+
+	public ExchangeRepositoryJdbcImpl() {
+		 
+	}
+
+
 
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
@@ -27,22 +33,24 @@ public class ExchangeRepositoryJdbcImpl implements ExchangeRepository {
 	}
 
 	@Override
-	public long Add(Exchange param) {
+	public long insert(Exchange param) {
 		//@formatter:off
 		String SQL = "INSERT INTO "
-				  + TABLE_NAME
+				  + TableType.EXCHANGES
 				  + "("
 				  + "Id,"
 				  + "Name,"
-				  + "Url,"
+				  + "LiveUrl,"
+				  + "TestUrl,"
 				  + "WsUrl"
 				
 				  + ")" 
-				  +" VALUES (?,?,?,?)";
+				  +" VALUES (?,?,?,?,?)";
 		return jdbcTemplate.update(SQL, 
 				param.getId(),  
 				param.getName() ,
-				param.getUrl(), 
+				param.getLiveUrl(), 
+				param.getTestUrl(), 
 				param.getWsUrl());
 		//@formatter:on
 	}
@@ -51,17 +59,19 @@ public class ExchangeRepositoryJdbcImpl implements ExchangeRepository {
 	public void update(Exchange param) {
 		//@formatter:off
 		String SQL = "UPDATE "
-		+ TABLE_NAME
+		+ TableType.EXCHANGES
 		+ " Set "
 		+ "Name=?,"
-		+ "Url=?,"
+		+ "LiveUrl=?,"
+		+ "TestUrl=?,"
 		+ "WsUrl=?"
 		+" )" 
 		+ " WHERE Id=?";
 
 		jdbcTemplate.update(SQL, 
 				param.getName(), 
-				param.getUrl(), 
+				param.getLiveUrl(),
+				param.getTestUrl(), 
 				param.getWsUrl(),
 				param.getId());
 		//@formatter:on
@@ -70,7 +80,7 @@ public class ExchangeRepositoryJdbcImpl implements ExchangeRepository {
 	@Override
 	public List<Exchange> findAll(Exchange param) {
 		Query query = generateSelectQuery(param);
-		List<Exchange> ohlcs = jdbcTemplate.query(query.getSql(), new ExchangeMapper(), query.getParameters());
+		List<Exchange> exchanges = jdbcTemplate.query(query.getSql(), new ExchangeMapper(), query.getParameters());
 
 //		List<Map<String, Object>> rows = jdbcTemplate.queryForList(query.getSql());
 //		List<Ohlc> ohlcs = new ArrayList<Ohlc>();
@@ -81,26 +91,26 @@ public class ExchangeRepositoryJdbcImpl implements ExchangeRepository {
 //			ohlcs.add(ohlc);
 //		}
 
-		return ohlcs;
+		return exchanges;
 	}
 
 	@Override
 	public Exchange find(Exchange param) {
 		Query query = generateSelectQuery(param);
-		Exchange ohlc = jdbcTemplate.queryForObject(query.getSql(), new ExchangeMapper(), query.getParameters());
-		return ohlc;
+		Exchange exchange = jdbcTemplate.queryForObject(query.getSql(), new ExchangeMapper(), query.getParameters());
+		return exchange;
 	}
 
 	@Override
 	public Exchange getById(long id) {
 		Query query =generateSelectQuery(new Exchange(id));
-		Exchange ohlc = jdbcTemplate.queryForObject(query.getSql(), new ExchangeMapper(), query.getParameters());
-		return ohlc;
+		Exchange exchange = jdbcTemplate.queryForObject(query.getSql(), new ExchangeMapper(), query.getParameters());
+		return exchange;
 	}
 
 	private Query generateSelectQuery(Exchange param) {
 
-		String SQL = "SELECT * FROM" + TABLE_NAME + " WHERE 1=1";
+		String SQL = "SELECT * FROM " + TableType.EXCHANGES + " WHERE 1=1";
 		List<Object> params = new ArrayList<Object>();
 
 		if (param.getId() > 0) {
@@ -108,11 +118,17 @@ public class ExchangeRepositoryJdbcImpl implements ExchangeRepository {
 			params.add(param.getId());
 		}
 
-		if (param.getName() != null) {
+		if (param != null) {
 			SQL += " AND Name=?";
 			params.add(param.getName());
 		}
  
 		return new Query(SQL, params.toArray());
+	}
+
+	@Override
+	public List<Exchange> getAll() {
+		String SQL = "SELECT * FROM " + TableType.EXCHANGES + " WHERE 1=1";
+		return jdbcTemplate.query(SQL, new ExchangeMapper());
 	}
 }

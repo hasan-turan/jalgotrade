@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.persistence.Table;
 
+import tr.com.jalgo.common.utils.ReflectionUtils;
 import tr.com.jalgo.model.BaseModel;
 import tr.com.jalgo.model.exceptions.RepositoryException;
 import tr.com.jalgo.repository.jdbc.Query;
-import tr.com.jalgo.utils.ReflectionUtils;
 
 public class QueryUtils  {
 
@@ -30,7 +30,7 @@ public class QueryUtils  {
 		
 		String tableName= getTableName(param);
 		
-		String SQL = "SELECT * FROM" + tableName + " WHERE 1=1";
+		String SQL = "SELECT * FROM " + tableName + " WHERE 1=1";
 		List<Object> params = new ArrayList<Object>();
 
 		if (param.getId() > 0) {

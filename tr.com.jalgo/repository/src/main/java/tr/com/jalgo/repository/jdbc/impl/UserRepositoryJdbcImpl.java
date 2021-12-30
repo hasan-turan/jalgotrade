@@ -10,16 +10,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import tr.com.jalgo.model.User;
+import tr.com.jalgo.repository.BaseRepository;
 import tr.com.jalgo.repository.UserRepository;
 import tr.com.jalgo.repository.jdbc.Query;
 import tr.com.jalgo.repository.jdbc.mapper.UserMapper;
+import tr.com.jalgo.repository.jdbc.types.TableType;
 
 @Repository("UserRepositoryJdbcImpl")
-public class UserRepositoryJdbcImpl implements UserRepository {
-
-	private static String TABLE_NAME = "Users";
+public class UserRepositoryJdbcImpl extends BaseRepository implements UserRepository {
 
 	private JdbcTemplate jdbcTemplate;
+
+	public UserRepositoryJdbcImpl() {
+	 
+	}
 
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
@@ -27,10 +31,10 @@ public class UserRepositoryJdbcImpl implements UserRepository {
 	}
 
 	@Override
-	public long Add(User param) {
+	public long insert(User param) {
 		//@formatter:off
 		String SQL = "INSERT INTO "
-				  + TABLE_NAME
+				  + TableType.USERS
 				  + "("
 				  + "Id,"
 				  + "Username,"
@@ -48,7 +52,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
 	public void update(User param) {
 		//@formatter:off
 		String SQL = "UPDATE "
-		+ TABLE_NAME
+		+ TableType.USERS
 		+ " Set "
 		+ "Username=?,"
 		+ "Password=?"
@@ -65,7 +69,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
 	@Override
 	public List<User> findAll(User param) {
 		Query query = generateSelectQuery(param);
-		List<User> result = jdbcTemplate.query(query.getSql(), new UserMapper(), query.getParameters());
+		List<User> users = jdbcTemplate.query(query.getSql(), new UserMapper(), query.getParameters());
 
 //		List<Map<String, Object>> rows = jdbcTemplate.queryForList(query.getSql());
 //		List<Ohlc> ohlcs = new ArrayList<Ohlc>();
@@ -76,26 +80,26 @@ public class UserRepositoryJdbcImpl implements UserRepository {
 //			ohlcs.add(ohlc);
 //		}
 
-		return result;
+		return users;
 	}
 
 	@Override
 	public User find(User param) {
 		Query query = generateSelectQuery(param);
-		User result = jdbcTemplate.queryForObject(query.getSql(), new UserMapper(), query.getParameters());
-		return result;
+		User user = jdbcTemplate.queryForObject(query.getSql(), new UserMapper(), query.getParameters());
+		return user;
 	}
 
 	@Override
 	public User getById(long id) {
 		Query query = generateSelectQuery(new User(id));
-		User result = jdbcTemplate.queryForObject(query.getSql(), new UserMapper(), query.getParameters());
-		return result;
+		User user = jdbcTemplate.queryForObject(query.getSql(), new UserMapper(), query.getParameters());
+		return user;
 	}
 
 	private Query generateSelectQuery(User param) {
 
-		String SQL = "SELECT * FROM" + TABLE_NAME + " WHERE 1=1";
+		String SQL = "SELECT * FROM " + TableType.USERS + " WHERE 1=1";
 		List<Object> params = new ArrayList<Object>();
 
 		if (param.getId() > 0) {
@@ -114,5 +118,11 @@ public class UserRepositoryJdbcImpl implements UserRepository {
 		}
 
 		return new Query(SQL, params.toArray());
+	}
+
+	@Override
+	public List<User> getAll() {
+		String SQL = "SELECT * FROM " + TableType.USERS + " WHERE 1=1";
+		return jdbcTemplate.query(SQL, new UserMapper());
 	}
 }

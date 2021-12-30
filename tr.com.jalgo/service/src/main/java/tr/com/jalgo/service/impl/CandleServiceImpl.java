@@ -18,8 +18,15 @@ public class CandleServiceImpl implements CandleService {
 	CandleRepository candleRepository;
 
 	@Override
-	public long Add(Candle param) {
-		return candleRepository.Add(param);
+	public long insert(Candle param) {
+		return candleRepository.insert(param);
+	}
+	
+	@Override
+	public long[] batchInsert(List<Candle> params) {
+	 
+			return candleRepository.batchInsert(params);
+		 
 	}
 
 	@Override
@@ -40,6 +47,11 @@ public class CandleServiceImpl implements CandleService {
 	@Override
 	public void update(Candle param) {
 		candleRepository.update(param);
+	}
+
+	@Override
+	public List<Candle> getAll() {
+		return candleRepository.getAll();
 	}
 
 }

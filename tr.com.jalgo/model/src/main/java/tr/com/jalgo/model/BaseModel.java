@@ -1,6 +1,7 @@
 package tr.com.jalgo.model;
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
  
@@ -18,10 +19,11 @@ public class BaseModel implements Serializable {
 	
 	@Getter
 	@Setter
+	@Column(name = "Id")
 	protected long id;
 	
 	
-	
+ 
 	
 	 
 }

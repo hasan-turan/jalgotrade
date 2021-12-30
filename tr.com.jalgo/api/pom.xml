@@ -12,13 +12,26 @@
 	<packaging>war</packaging>
 
 	<dependencies>
-	<dependency>
+
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>tr.com.jalgo</groupId>
+			<artifactId>common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>tr.com.jalgo</groupId>
+			<artifactId>binance</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>tr.com.jalgo</groupId>
 			<artifactId>service</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>tr.com.jalgo</groupId>
-			<artifactId>historicaldata</artifactId>
+			<artifactId>data</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

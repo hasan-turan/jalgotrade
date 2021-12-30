@@ -15,12 +15,13 @@
 			<artifactId>model</artifactId>
 		</dependency>
 
- 		 <dependency>
+		<dependency>
 			<groupId>tr.com.jalgo</groupId>
-			<artifactId>utils</artifactId>
+			<artifactId>common</artifactId>
 		</dependency>
 
-
+		 
+		
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>mssql-jdbc</artifactId>

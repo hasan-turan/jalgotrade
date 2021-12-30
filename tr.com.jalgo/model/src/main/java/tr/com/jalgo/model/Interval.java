@@ -16,10 +16,10 @@ public class Interval extends BaseModel {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private String value;
+	private String name;
 
-	public Interval(String value) {
-		this.value = value;
+	public Interval(String name) {
+		this.name = name;
 	}
 	public Interval(long id) {
 		this.id = id;

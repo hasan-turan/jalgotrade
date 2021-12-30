@@ -18,8 +18,8 @@ public class ExchangeServiceImpl implements ExchangeService {
 	ExchangeRepository exchangeRepository;
 
 	@Override
-	public long Add(Exchange param) {
-		return exchangeRepository.Add(param);
+	public long insert(Exchange param) {
+		return exchangeRepository.insert(param);
 	}
 
 	@Override
@@ -40,6 +40,11 @@ public class ExchangeServiceImpl implements ExchangeService {
 	@Override
 	public void update(Exchange param) {
 		exchangeRepository.update(param);
+	}
+
+	@Override
+	public List<Exchange> getAll() {
+		return exchangeRepository.getAll();
 	}
 
 }

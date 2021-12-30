@@ -28,19 +28,73 @@
 
 	<modules>
 		<module>model</module>
-		<module>utils</module>
+		<module>common</module>
 		<module>binance</module>
 		<module>repository</module>
 		<module>api</module>
-		<module>historicaldata</module>
+		<module>data</module>
 		<module>service</module>
+
+		<module>ws</module>
 	</modules>
 	<name>jalgo</name>
 	<description>Java Algorithmic Trading Project</description>
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- For model HttpStatus enum -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>4.4.15</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>2.13.0</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.enterprise</groupId>
+				<artifactId>cdi-api</artifactId>
+				<version>1.2</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>1.4</version>
+			</dependency>
 
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-cache</artifactId>
+				<version>2.6.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.cache</groupId>
+				<artifactId>cache-api</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.sf.ehcache</groupId>
+				<artifactId>ehcache</artifactId>
+				<version>2.10.9.2</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjrt</artifactId>
+				<version>1.9.7</version>
+			</dependency>
+
+			<!-- <dependency> -->
+			<!-- <groupId>org.aspectj</groupId> -->
+			<!-- <artifactId>aspectjweaver</artifactId> -->
+			<!-- <version>1.9.7</version> -->
+			<!-- <scope>runtime</scope> -->
+			<!-- </dependency> -->
 
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
@@ -155,7 +209,11 @@
 				<artifactId>httpclient</artifactId>
 				<version>4.5.10</version>
 			</dependency>
-
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>tr.com.jalgo</groupId>
 				<artifactId>model</artifactId>
@@ -170,7 +228,7 @@
 
 			<dependency>
 				<groupId>tr.com.jalgo</groupId>
-				<artifactId>utils</artifactId>
+				<artifactId>common</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -185,7 +243,7 @@
 			</dependency>
 			<dependency>
 				<groupId>tr.com.jalgo</groupId>
-				<artifactId>historicaldata</artifactId>
+				<artifactId>data</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -198,6 +256,13 @@
 				<artifactId>service</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>tr.com.jalgo</groupId>
+				<artifactId>ws</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 		</dependencies>
 
 
@@ -207,10 +272,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
-<!-- 		 <dependency> -->
-<!--             <groupId>org.springframework.boot</groupId> -->
-<!--             <artifactId>spring-boot-starter-data-jdbc</artifactId> -->
-<!--         </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework.boot</groupId> -->
+		<!-- <artifactId>spring-boot-starter-data-jdbc</artifactId> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>

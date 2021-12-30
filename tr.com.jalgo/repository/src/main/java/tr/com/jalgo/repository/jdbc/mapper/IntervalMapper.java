@@ -12,7 +12,7 @@ public class IntervalMapper  implements RowMapper<Interval> {
 	public Interval mapRow(ResultSet rs, int rowNum) throws SQLException {
 		 Interval interval= new Interval();
 		 interval.setId(rs.getInt("Id"));
-		 interval.setValue(rs.getString("Value"));
+		 interval.setName(rs.getString("Name"));
 		 return interval;
 	}
 

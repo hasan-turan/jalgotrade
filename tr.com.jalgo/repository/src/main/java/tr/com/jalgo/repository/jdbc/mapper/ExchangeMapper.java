@@ -13,7 +13,8 @@ public class ExchangeMapper  implements RowMapper<Exchange> {
 		 Exchange exchange= new Exchange();
 		 exchange.setId(rs.getInt("Id"));
 		 exchange.setName(rs.getString("Name"));
-		 exchange.setUrl(rs.getString("Url"));
+		 exchange.setLiveUrl(rs.getString("LiveUrl"));
+		 exchange.setTestUrl(rs.getString("TestUrl"));
 		 exchange.setWsUrl(rs.getString("WsUrl"));
 		 return exchange;
 	}
