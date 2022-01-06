@@ -3,19 +3,23 @@ package tr.com.jalgo.api;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
 
+import tr.com.jalgo.binance.BinanceExchange;
+import tr.com.jalgo.binance.BinanceProperties;
 import tr.com.jalgo.model.Exchange;
 import tr.com.jalgo.model.Parity;
+import tr.com.jalgo.model.types.EnvironmentType;
 import tr.com.jalgo.service.ExchangeService;
 import tr.com.jalgo.service.ParityService;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "tr.com.jalgo.*.**" })
-public class JalgoApplication extends SpringBootServletInitializer  {
+public class JalgoApplication extends SpringBootServletInitializer  implements CommandLineRunner {
 
 	@Autowired
 	ExchangeService exchangeService;
@@ -38,6 +42,14 @@ public class JalgoApplication extends SpringBootServletInitializer  {
 //		
 		SpringApplication.run(JalgoApplication.class, args);
 
+	}
+
+	@Override
+	public void run(String... args) throws Exception {
+		BinanceExchange binance = new BinanceExchange(BinanceProperties.LIVE_API_KEY, BinanceProperties.LIVE_SECRET_KEY,
+				EnvironmentType.LIVE);
+		binance.start(EnvironmentType.LIVE);
+		
 	}
  
 

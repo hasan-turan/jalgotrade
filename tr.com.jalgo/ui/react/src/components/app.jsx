@@ -1,67 +1,79 @@
-import "@css/app.css";
-import "primereact/resources/themes/bootstrap4-light-blue/theme.css"; //theme
-//import "primereact/resources/themes/bootstrap4-dark-blue/theme.css";  //theme
-
-import "primereact/resources/primereact.min.css"; //core css
-import "primeicons/primeicons.css"; //icons
-import { Splitter, SplitterPanel } from "primereact/splitter";
-import { PanelMenu } from "primereact/panelmenu";
-import PrimeReact from "primereact/api";
+import React, { useState } from "react";
+import { Breadcrumb, Layout, Menu } from "antd";
+import "@assets/css/app.css";
+import "@assets/css/app.less";
+import {
+  MenuUnfoldOutlined,
+  MenuFoldOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
+  UploadOutlined,
+  MenuOutlined,
+} from "@ant-design/icons";
 
 import { Routes, Route } from "react-router-dom";
 import About from "./about";
 import Home from "./home";
 import Binance from "./binance";
-import React from "react";
 
 import { useNavigate } from "react-router-dom";
 
-PrimeReact.ripple = true;
+const { Header, Footer, Sider, Content } = Layout;
+const { SubMenu } = Menu;
 
 const App = (props) => {
   const navigate = useNavigate();
-
+  const [collapsed, setCollapsed] = useState(false);
   const navigateToPage = (path) => {
-    console.log("Path",path);
+    console.log("Path", path);
     navigate(path);
   };
-  const items = [
-    {
-      label: "Home",
-      icon: "pi pi-fw pi-file",
-      url: "/home",
-    },
-    {
-      label: "Binance",
-      icon: "pi pi-fw pi-file",
-      items: [
-        {
-          label: "Binance test",
-          icon: "pi pi-fw pi-plus",
-          command: () => {
-            navigateToPage("/binance");
-          },
-        },
-      ],
-    },
-  ];
+
+  const onCollapse = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
-    <React.Fragment>
-      <Splitter className="x-splitter">
-        <SplitterPanel size={20} className="x-left-menu">
-          <PanelMenu model={items} />
-        </SplitterPanel>
-        <SplitterPanel size={80}>
-          <Routes>
-            <Route exact path="/" element={<Home />} />
+    <Layout className="x-main-layout">
+      <Header className="x-site-header" style={{ padding: 0 }}>
+        Header
+      </Header>
 
-            <Route exact path="/binance" element={<Binance />} />
-
-            <Route exact path="/about" element={<About />} />
-          </Routes>
-        </SplitterPanel>
-      </Splitter>
-    </React.Fragment>
+      <Layout className="x-site-layout">
+        <Sider
+          className="x-sider"
+          collapsible
+          collapsed={collapsed}
+          onCollapse={onCollapse}
+        >
+          <div className="x-logo" />
+          <Menu mode="inline" defaultSelectedKeys={["1"]}>
+            <SubMenu
+              key="menuExchanges"
+              icon={<MenuOutlined />}
+              title="Exchanges"
+            >
+              <Menu.Item
+                key="menuBinance"
+                onClick={() => navigateToPage("/binance")}
+              >
+                Binance
+              </Menu.Item>
+            </SubMenu>
+          </Menu>
+        </Sider>
+        <Layout className="x-site-content-layout">
+          <Content className="x-site-content">
+            <Routes>
+              <Route exact path="/" element={<Home />} />
+              <Route exact path="/binance" element={<Binance />} />
+              <Route exact path="/about" element={<About />} />
+            </Routes>
+          </Content>
+        </Layout>
+      </Layout>
+      <Footer className="x-site-footer">Footer</Footer>
+    </Layout>
   );
 };
 

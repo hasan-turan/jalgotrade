@@ -23,6 +23,8 @@ public class Asset extends BaseModel{
 	private static final long serialVersionUID = 1L;
 	private String symbol;
 	private String description;
+	private int precision;
+	private int commissionPrecision;
 	
 	public Asset(long id) {
 		this.id=id;

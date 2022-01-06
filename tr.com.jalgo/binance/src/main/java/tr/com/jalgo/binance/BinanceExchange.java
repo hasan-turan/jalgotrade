@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -42,39 +43,42 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.com.jalgo.binance.helpers.BinanceExchangeInfoHelper;
+import tr.com.jalgo.binance.models.Symbol;
 import tr.com.jalgo.model.ApiResponse;
 import tr.com.jalgo.model.Candle;
-import tr.com.jalgo.model.Exchange;
 import tr.com.jalgo.model.IExchange;
 import tr.com.jalgo.model.Parity;
+import tr.com.jalgo.model.RemoteExchange;
 import tr.com.jalgo.model.exceptions.ExchangeException;
 import tr.com.jalgo.model.strategies.Strategy;
+import tr.com.jalgo.model.types.EnvironmentType;
 import tr.com.jalgo.model.types.HttpMethodType;
 import tr.com.jalgo.model.types.IntervalType;
+import tr.com.jalgo.model.types.StatusType;
 import tr.com.jalgo.model.types.StrategyResultType;
 import tr.com.jalgo.ws.MessageHandler;
-import tr.com.jalgo.ws.WebSocketClient;
+import tr.com.jalgo.ws.WsClientEndpoint;
+import tr.com.jalgo.ws.managers.ClientEndpointManager;
 
 @SuppressWarnings("serial")
 
-public class BinanceExchange extends Exchange implements IExchange {
+public class BinanceExchange extends RemoteExchange implements IExchange {
 
-	
-	
 	private final static String LIVE_API_URL = "https://api.binance.com";
 	private final static String TESTNET_API_URL = "https://testnet.binance.vision";
-	
+
 	private final static String LIVE_WEBSOCKET_URL = "wss://stream.binance.com:9443/ws/";
 	private final static String TESTNET_WEBSOCKET_URL = "wss://testnet.binance.vision/ws";
 
-	private WebSocketClient wsClient = null;
-	// private Session session = null;
-
-	public BinanceExchange(String apiKey, String secretKey, boolean isTestNet) {
-		super(apiKey, secretKey, isTestNet ? TESTNET_API_URL : LIVE_API_URL,
-				isTestNet ? TESTNET_WEBSOCKET_URL : LIVE_WEBSOCKET_URL);
+	public BinanceExchange(String apiKey, String secretKey, EnvironmentType type) {
+		super(apiKey, secretKey, type == EnvironmentType.LIVE ? LIVE_API_URL : TESTNET_API_URL,
+				type == EnvironmentType.LIVE ? LIVE_WEBSOCKET_URL : TESTNET_WEBSOCKET_URL, type);
 
 	}
+
+	private WsClientEndpoint wsClient = null;
+	// private Session session = null;
 
 	private String generateSignature(String queryStringParams, String bodyParams)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException {
@@ -111,9 +115,10 @@ public class BinanceExchange extends Exchange implements IExchange {
 		if (parities != null) {
 			requestParams = new SimpleEntry<String, Object>("symbols",
 					String.join(",", parities.stream().map(parity -> getParity(parity)).toArray(String[]::new)));
+			return sendRequest(requestUrl, HttpMethodType.GET, requestParams);
 		}
 
-		return sendRequest(requestUrl, HttpMethodType.GET, requestParams);
+		return sendRequest(requestUrl, HttpMethodType.GET);
 
 	}
 
@@ -175,7 +180,6 @@ public class BinanceExchange extends Exchange implements IExchange {
 				new SimpleEntry<String, Object>("endTime", endDate.getTime()));
 	}
 
-	 
 	@Override
 	public void trade(Parity parity, IntervalType interval, List<Strategy> strategies) throws ExchangeException {
 
@@ -186,8 +190,10 @@ public class BinanceExchange extends Exchange implements IExchange {
 				+ parity.getCounterAsset().getSymbol().toLowerCase() + "@kline_" + interval.getValue();
 
 		try {
-			wsClient = new WebSocketClient(this.getWsUrl() + path);
-			wsClient.addMessageHandler(new MessageHandler() {
+			String wsUrl = this.getAccount().getType() == EnvironmentType.TEST ? this.getTestWsUrl()
+					: this.getLiveWsUrl();
+
+			wsClient = new WsClientEndpoint(wsUrl + path, new MessageHandler() {
 				@Override
 				public void handleMessage(String message) {
 					System.out.println(message);
@@ -257,6 +263,7 @@ public class BinanceExchange extends Exchange implements IExchange {
 				}
 
 			});
+
 		} catch (URISyntaxException | DeploymentException | IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -276,7 +283,7 @@ public class BinanceExchange extends Exchange implements IExchange {
 		ApiResponse ApiResponse = sendRequest("/api/v3/userDataStream", HttpMethodType.POST, null, Optional.of(true),
 				Optional.of(false));
 
-		if (ApiResponse.getStatusCode() == HttpStatus.SC_ACCEPTED)
+		if (ApiResponse.getStatus() == StatusType.OK)
 			this.getAccount().setListenKey(ApiResponse.getData().toString());
 
 		return ApiResponse;
@@ -315,12 +322,12 @@ public class BinanceExchange extends Exchange implements IExchange {
 			Optional<Boolean> addApikeyToHeader, Optional<Boolean> secure,
 			SimpleEntry<String, Object>... requestParams) {
 
-		ApiResponse ApiResponse = new ApiResponse();
+		ApiResponse apiResponse = new ApiResponse();
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		try {
 			var requestURL = this.getLiveUrl() + path;
 			String parameters = null;
-			if (requestParams != null) {
+			if (requestParams != null && requestParams.length > 0) {
 
 				// converting all parameters to an array like-> [key1=value1, key2=value2,....]
 				String[] parametersArray = Arrays.asList(requestParams).stream()
@@ -359,32 +366,38 @@ public class BinanceExchange extends Exchange implements IExchange {
 			if (addApikeyToHeader != null ? addApikeyToHeader.isPresent() : false)
 				httpUriRequest.addHeader("X-MBX-APIKEY", this.getAccount().getApiKey());
 
-			CloseableHttpResponse response = httpClient.execute(httpUriRequest);
-			ApiResponse.setStatusCode(response.getStatusLine().getStatusCode());
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-				ApiResponse.setError(response.getStatusLine().getReasonPhrase());
+			CloseableHttpResponse httpResponse = httpClient.execute(httpUriRequest);
+
+			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				apiResponse.setError(httpResponse.getStatusLine().getReasonPhrase());
 			} else {
-				ApiResponse.setInfo(response.getStatusLine().getReasonPhrase());
+				
+				apiResponse.setStatus(StatusType.OK);
+				
+				if (!httpResponse.getStatusLine().getReasonPhrase().equals("OK"))
+					apiResponse.setInfo(httpResponse.getStatusLine().getReasonPhrase());
+				
+				
 			}
 
-			HttpEntity entity = response.getEntity();
+			HttpEntity entity = httpResponse.getEntity();
 			if (entity != null) {
 				// return it as a String
-				ApiResponse.setData(EntityUtils.toString(entity));
+				apiResponse.setData(EntityUtils.toString(entity));
 			}
-			response.close();
+			httpResponse.close();
 
 		} catch (Exception ex) {
-			ApiResponse.setError(ex.getMessage());
+			apiResponse.setError(ex.getMessage());
 
 		} finally {
 			try {
 				httpClient.close();
 			} catch (IOException e) {
-				ApiResponse.setError(e.getMessage());
+				apiResponse.setError(e.getMessage());
 			}
 		}
-		return ApiResponse;
+		return apiResponse;
 	}
 
 	@Override
@@ -407,6 +420,43 @@ public class BinanceExchange extends Exchange implements IExchange {
 		}
 
 		return candle;
+	}
+
+	@Override
+	public void start(EnvironmentType environment) throws ExchangeException {
+
+		ApiResponse apiResponse = this.getExchangeInfo(null);
+		if (apiResponse.getStatus() == StatusType.OK) {
+
+			BinanceExchangeInfoHelper binanceExchangeInfoHelper = new BinanceExchangeInfoHelper(
+					apiResponse.getData().toString());
+
+			for (Symbol symbol : binanceExchangeInfoHelper.getExchangeInfo().getSymbols()) {
+
+				String parity = symbol.getBaseAsset().toLowerCase() + "" + symbol.getQuoteAsset().toLowerCase();
+				String wsUrl = "ws://localhost:8080/binance/kline?token=123456&parity=" + parity
+						+ "&interval=4h&environment=" + environment.getKey();
+
+//				WsClientManager.createWebSocketClient(wsUrl, new MessageHandler() {
+//
+//					@Override
+//					public void handleMessage(String message) {
+//						System.out.println(message);
+//					}
+//
+//					@Override
+//					public void handleOnOpen(Session session) throws ExchangeException {
+//
+//					}
+//
+//					@Override
+//					public void handleKeepAlive() throws ExchangeException {
+//					}
+//
+//				});
+
+			}
+		}
 	}
 
 }

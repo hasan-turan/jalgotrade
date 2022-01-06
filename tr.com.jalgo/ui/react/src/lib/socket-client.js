@@ -1,34 +1,32 @@
 import logger from "./logger";
 
 class SocketClient {
-  constructor(baseUrl, path, handler) {
-    this.baseUrl = baseUrl;
-    this.socketPath = path;
+  constructor(url, handler) {
+    this.url = url;
+   
     this.handler = handler;
     this.webSocket = null;
     this.createSocket();
   }
 
   createSocket() {
-    const wsUrl = `${this.baseUrl}${this.socketPath}`;
-    console.log(`URL:${wsUrl} `);
-    this.webSocket = new WebSocket(wsUrl);
-
+    
+    this.webSocket = new WebSocket(this.url);
+  
     this.webSocket.onopen = () => {
-      logger.info(`Ws:Connected to ${wsUrl}`);
+      logger.info(`Ws:Connected to ${this.url}`);
     };
 
     this.webSocket.onclose = () => {
-      logger.info(`Ws:Disconnected from ${wsUrl}`);
+      logger.info(`Ws:Disconnected from ${this.url}`);
     };
 
     this.webSocket.onerror = (err) => {
-      logger.warn(`Ws:Error ${wsUrl} ->${err}`);
+      logger.warn(`Ws:Error ${this.url} ->${err}`);
     };
 
-    this.webSocket.onmessage = (msg) => {
+    this.webSocket.onmessage = (message) => {
       try {
-        const message = JSON.parse(msg.content);
         if (this.handler) this.handler(message);
       } catch (ex) {
         logger.err("Parse message failed", ex);
@@ -41,12 +39,12 @@ class SocketClient {
    * User data streams will close after 60 minutes.
    * It's recommended to send a ping about every 30 minutes. */
   heartBeat() {
-    setInterval(() => {
-      if (this.webSocket.readyState === WebSocket.OPEN) {
-        if (this.pingFn) this.pingFn(this.listenKey);
-        logger.debug(`Ping sent for key:${this.listenKey}`);
-      }
-    }, 25 * 60 * 1000); // ping every 30 minutes
+    // setInterval(() => {
+    //   if (this.webSocket.readyState === WebSocket.OPEN) {
+    //     if (this.pingFn) this.pingFn(this.listenKey);
+    //     logger.debug(`Ping sent for key:${this.listenKey}`);
+    //   }
+    // }, 25 * 60 * 1000); // ping every 30 minutes
   }
 
    

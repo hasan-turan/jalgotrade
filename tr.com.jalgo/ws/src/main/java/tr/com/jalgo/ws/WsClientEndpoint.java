@@ -20,16 +20,19 @@ import lombok.Getter;
 import tr.com.jalgo.model.exceptions.ExchangeException;
 
 @ClientEndpoint
-public class WebSocketClient {
+public class WsClientEndpoint {
 
 //	private ClientEndpointConfig wsConfig;
 //	private Configurator configurator;
 
 	@Getter
-	Session session = null;
+	private Session session = null;
+
 	private MessageHandler messageHandler;
 
 	private WebSocketContainer container = null;
+
+	@Getter
 	private URI uri;
 
 //	private Configurator createConfigurator(final Map<String, Map<String, String>> wsHeaders) {
@@ -54,18 +57,34 @@ public class WebSocketClient {
 //		};
 //	}
 
-	public WebSocketClient(String url) throws URISyntaxException, DeploymentException, IOException {
-		 
-			this.uri = new URI(url);
-			this.container = ContainerProvider.getWebSocketContainer();
-			this.session = container.connectToServer(this, this.uri);
-//			Map<String, Map<String, String>> wsHeaders = null;
-//			this.configurator = createConfigurator(wsHeaders);
-//			Builder builder = ClientEndpointConfig.Builder.create().configurator(this.configurator);
-//			this.wsConfig = builder.build();
-//			wsConfig.getUserProperties().put("params", new String[] { "btcusdt@aggTrade" });
+//	public WsClientEndpoint(String url) throws URISyntaxException, DeploymentException, IOException {
+//		 
+//			this.uri = new URI(url);
+//			this.container = ContainerProvider.getWebSocketContainer();
+//			this.session = container.connectToServer(this, this.uri);
+////			Map<String, Map<String, String>> wsHeaders = null;
+////			this.configurator = createConfigurator(wsHeaders);
+////			Builder builder = ClientEndpointConfig.Builder.create().configurator(this.configurator);
+////			this.wsConfig = builder.build();
+////			wsConfig.getUserProperties().put("params", new String[] { "btcusdt@aggTrade" });
+//
+//		 
+//	}
 
-		 
+	public WsClientEndpoint(String url, MessageHandler messageHandler)
+			throws URISyntaxException, DeploymentException, IOException {
+
+		this.uri = new URI(url);
+		this.container = ContainerProvider.getWebSocketContainer();
+		this.messageHandler = messageHandler;
+		this.session = container.connectToServer(this, this.uri);
+
+//		Map<String, Map<String, String>> wsHeaders = null;
+//		this.configurator = createConfigurator(wsHeaders);
+//		Builder builder = ClientEndpointConfig.Builder.create().configurator(this.configurator);
+//		this.wsConfig = builder.build();
+//		wsConfig.getUserProperties().put("params", new String[] { "btcusdt@aggTrade" });
+
 	}
 
 	/**
@@ -103,7 +122,7 @@ public class WebSocketClient {
 	 */
 	@OnClose
 	public void onClose(Session session, CloseReason reason) {
-		System.out.println("closing websocket");
+		System.out.println("closing websocket. Reason: " + reason.getReasonPhrase());
 		this.session = null;
 	}
 

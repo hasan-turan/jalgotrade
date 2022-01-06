@@ -1,3 +1,4 @@
 /.metadata/
 /target/
 /node_modules/
+/binance/src/main/java/tr/com/jalgo/binance/BinanceProperties.java

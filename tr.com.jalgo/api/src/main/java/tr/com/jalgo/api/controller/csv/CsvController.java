@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -24,6 +23,7 @@ import tr.com.jalgo.model.Exchange;
 import tr.com.jalgo.model.Interval;
 import tr.com.jalgo.model.Parity;
 import tr.com.jalgo.model.exceptions.ExchangeException;
+import tr.com.jalgo.model.types.StatusType;
 import tr.com.jalgo.service.CandleService;
 import tr.com.jalgo.service.DataSourceService;
 import tr.com.jalgo.service.ExchangeService;
@@ -69,7 +69,7 @@ public class CsvController {
 
 	@PostMapping(value = "/test")
 	public ApiResponse test() throws IOException {
-		return new ApiResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR, "OK");
+		return new ApiResponse(StatusType.ERROR, "OK");
 
 	}
 
@@ -77,7 +77,7 @@ public class CsvController {
 	public ApiResponse upload(@RequestParam("file") MultipartFile file) throws IOException {
 
 		if (file.isEmpty())
-			return new ApiResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Please specify a file");
+			return new ApiResponse(StatusType.ERROR, "Please specify a file");
 
 		String[] fileNameParts = FilenameUtils.removeExtension(file.getOriginalFilename()).split("_");
 
@@ -85,7 +85,7 @@ public class CsvController {
 		 * filename= DataSource_Exchange_Parity_Year_Interval.csv
 		 */
 		if (fileNameParts.length < 5)
-			return new ApiResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR,
+			return new ApiResponse(StatusType.ERROR,
 					"File name should be in  [CryptoDataDownload_Bitstamp_BTC#USD_2017_1minute.csv] format");
 
 		DataSource dataSource = getDataSource(fileNameParts[0]);

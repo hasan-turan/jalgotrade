@@ -41,17 +41,18 @@ public class ExchangeRepositoryJdbcImpl extends BaseRepository implements Exchan
 				  + "Id,"
 				  + "Name,"
 				  + "LiveUrl,"
+				  + "LiveWsUrl,"
 				  + "TestUrl,"
-				  + "WsUrl"
-				
+				  + "TestWsUrl"
 				  + ")" 
-				  +" VALUES (?,?,?,?,?)";
+				  +" VALUES (?,?,?,?,?,?)";
 		return jdbcTemplate.update(SQL, 
 				param.getId(),  
 				param.getName() ,
-				param.getLiveUrl(), 
-				param.getTestUrl(), 
-				param.getWsUrl());
+				param.getLiveUrl(),
+				param.getLiveWsUrl(),
+				param.getTestUrl(),
+				param.getTestWsUrl());
 		//@formatter:on
 	}
 
@@ -63,16 +64,20 @@ public class ExchangeRepositoryJdbcImpl extends BaseRepository implements Exchan
 		+ " Set "
 		+ "Name=?,"
 		+ "LiveUrl=?,"
+		+ "LiveWsUrl=?," 
 		+ "TestUrl=?,"
-		+ "WsUrl=?"
+		+ "TestWsUrl=?"
 		+" )" 
 		+ " WHERE Id=?";
 
 		jdbcTemplate.update(SQL, 
 				param.getName(), 
+		 
 				param.getLiveUrl(),
-				param.getTestUrl(), 
-				param.getWsUrl(),
+				param.getLiveWsUrl(),
+			 
+				param.getTestUrl(),
+				param.getTestWsUrl(),
 				param.getId());
 		//@formatter:on
 	}

@@ -3,15 +3,15 @@ package tr.com.jalgo.model.types;
 import lombok.Getter;
 
 public enum StatusType {
-	
-	UNDEFINED("Undefined"),OK("Ok"), ERROR("Error");
-	
+
+	UNDEFINED(0), OK(200), ERROR(500);
+
 	@Getter
-	private String value;
-	
-	private StatusType(String value) {
-		this.value=value;
+	private int value;
+
+	private StatusType(int value) {
+		this.value = value;
 	}
-	
-	
+
+	 
 }

@@ -9,18 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import tr.com.jalgo.model.Account;
-import tr.com.jalgo.repository.AccountRepository;
+import tr.com.jalgo.model.ExchangeAccount;
+import tr.com.jalgo.repository.ExchangeAccountRepository;
 import tr.com.jalgo.repository.BaseRepository;
 import tr.com.jalgo.repository.jdbc.Query;
 import tr.com.jalgo.repository.jdbc.mapper.AccountMapper;
 import tr.com.jalgo.repository.jdbc.types.TableType;
 
-@Repository("AccountRepositoryJdbcImpl")
-public class AccountRepositoryJdbcImpl extends BaseRepository implements AccountRepository {
+@Repository("ExchangeAccountRepositoryJdbcImpl")
+public class ExchangeAccountRepositoryJdbcImpl extends BaseRepository implements ExchangeAccountRepository {
 
-	public AccountRepositoryJdbcImpl() {
-		 
+	public ExchangeAccountRepositoryJdbcImpl() {
+
 	}
 
 	private JdbcTemplate jdbcTemplate;
@@ -32,7 +32,7 @@ public class AccountRepositoryJdbcImpl extends BaseRepository implements Account
 	}
 
 	@Override
-	public long insert(Account param) {
+	public long insert(ExchangeAccount param) {
 		//@formatter:off
 		String SQL = "INSERT INTO "
 				  + TableType.ACCOUNTS
@@ -41,9 +41,10 @@ public class AccountRepositoryJdbcImpl extends BaseRepository implements Account
 				  + "UserId,"
 				  + "ExchangeId,"
 				  + "ApiKey,"
-				  + "SecretKey"
+				  + "SecretKey,"
+				  +	"Type"
 				  + ")" 
-				  +" VALUES (?,?,?,?,?)";
+				  +" VALUES (?,?,?,?,?,?)";
 		return jdbcTemplate.update(SQL, 
 				param.getId(),  
 				param.getUser().getId() ,
@@ -55,7 +56,7 @@ public class AccountRepositoryJdbcImpl extends BaseRepository implements Account
 	}
 
 	@Override
-	public void update(Account param) {
+	public void update(ExchangeAccount param) {
 		//@formatter:off
 		String SQL = "UPDATE "
 		+ TableType.ACCOUNTS
@@ -63,7 +64,8 @@ public class AccountRepositoryJdbcImpl extends BaseRepository implements Account
 		+ "UserId=?,"
 		+ "ExchangeId=?,"
 		+ "ApiKey=?,"
-		+ "SecretKey=?"
+		+ "SecretKey=?,"
+		+ "Type=?"
 		+" )" 
 		+ " WHERE Id=?";
 
@@ -72,14 +74,15 @@ public class AccountRepositoryJdbcImpl extends BaseRepository implements Account
 				param.getExchange().getId(),
 				param.getApiKey(),
 				param.getSecretKey(),
+				param.getType(),
 				param.getId());
 		//@formatter:on
 	}
 
 	@Override
-	public List<Account> findAll(Account param) {
+	public List<ExchangeAccount> findAll(ExchangeAccount param) {
 		Query query = generateSelectQuery(param);
-		List<Account> accounts = jdbcTemplate.query(query.getSql(), new AccountMapper(), query.getParameters());
+		List<ExchangeAccount> accounts = jdbcTemplate.query(query.getSql(), new AccountMapper(), query.getParameters());
 
 //		List<Map<String, Object>> rows = jdbcTemplate.queryForList(query.getSql());
 //		List<Ohlc> ohlcs = new ArrayList<Ohlc>();
@@ -94,20 +97,20 @@ public class AccountRepositoryJdbcImpl extends BaseRepository implements Account
 	}
 
 	@Override
-	public Account find(Account param) {
+	public ExchangeAccount find(ExchangeAccount param) {
 		Query query = generateSelectQuery(param);
-		Account account = jdbcTemplate.queryForObject(query.getSql(), new AccountMapper(), query.getParameters());
+		ExchangeAccount account = jdbcTemplate.queryForObject(query.getSql(), new AccountMapper(), query.getParameters());
 		return account;
 	}
 
 	@Override
-	public Account getById(long id) {
-		Query query = generateSelectQuery(new Account(id));
-		Account account = jdbcTemplate.queryForObject(query.getSql(), new AccountMapper(), query.getParameters());
+	public ExchangeAccount getById(long id) {
+		Query query = generateSelectQuery(new ExchangeAccount(id));
+		ExchangeAccount account = jdbcTemplate.queryForObject(query.getSql(), new AccountMapper(), query.getParameters());
 		return account;
 	}
 
-	private Query generateSelectQuery(Account param) {
+	private Query generateSelectQuery(ExchangeAccount param) {
 		String SQL = "SELECT * FROM " + TableType.ACCOUNTS + " WHERE 1=1";
 		List<Object> params = new ArrayList<Object>();
 
@@ -126,11 +129,17 @@ public class AccountRepositoryJdbcImpl extends BaseRepository implements Account
 			params.add(param.getExchange().getId());
 		}
 
+		
+		if (param.getType() != null) {
+			SQL += " AND Type=?";
+			params.add(param.getType().getValue());
+		}
+
 		return new Query(SQL, params.toArray());
 	}
 
 	@Override
-	public List<Account> getAll() {
+	public List<ExchangeAccount> getAll() {
 		String SQL = "SELECT * FROM " + TableType.ACCOUNTS + " WHERE 1=1";
 		return jdbcTemplate.query(SQL, new AccountMapper());
 	}

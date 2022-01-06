@@ -1,6 +1,6 @@
 import React from "react";
  
-import '@css/home.css';
+import '@assets/css/home.css';
 
 var Home = () => {
     

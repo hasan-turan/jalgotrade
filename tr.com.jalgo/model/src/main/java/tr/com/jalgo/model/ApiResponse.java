@@ -4,10 +4,9 @@ package tr.com.jalgo.model;
 
  
 
-import org.apache.http.HttpStatus;
-
 import lombok.Getter;
 import lombok.Setter;
+import tr.com.jalgo.model.types.StatusType;
 
 public class ApiResponse {
 	@Getter
@@ -15,11 +14,11 @@ public class ApiResponse {
 	private Object data;
 
 	@Getter
-	private String message;
+	private String message="";
 
 	@Getter
 	@Setter
-	private int statusCode;
+	private StatusType status;
 
 	 
 
@@ -27,29 +26,29 @@ public class ApiResponse {
 
 	}
 
-	public ApiResponse(int statusCode) {
-		this.statusCode = statusCode;
+	public ApiResponse(StatusType status) {
+		this.status = status;
 
 	}
 
-	public ApiResponse(int statusCode, String message) {
-		this.statusCode = statusCode;
+	public ApiResponse(StatusType status, String message) {
+		this.status = status;
 		this.message = message;
 	}
 	
-	public ApiResponse(Object data,int statusCode,String message) {
+	public ApiResponse(Object data,StatusType status,String message) {
 		this.data=data;
-		this.statusCode=statusCode;
+		this.status=status;
 		this.message=message;
 	}
 
 	public void setError(String error) {
-		this.statusCode = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+		this.status = StatusType.ERROR;
 		this.message += error + "\r\n";
 	}
 
 	public void setInfo(String info) {
-		this.statusCode = HttpStatus.SC_ACCEPTED;
+		this.status = StatusType.OK;
 		this.message += info + "\r\n";
 	}
 }

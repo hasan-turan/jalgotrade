@@ -1,11 +1,15 @@
 package tr.com.jalgo.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tr.com.jalgo.model.types.EnvironmentType;
 
 /**
  * In Java, all non-static methods are by default "virtual functions." Only
@@ -18,6 +22,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "Exchanges")
 public class Exchange extends BaseModel {
+
 	/**
 	 * 
 	 */
@@ -26,39 +31,49 @@ public class Exchange extends BaseModel {
 	private String name;
 
 	private String liveUrl;
-	
+
+	private String liveWsUrl;
+
 	private String testUrl;
 
-	private String wsUrl;
+	private String testWsUrl;
 
-	private Account account;
+	private ExchangeAccount account;
 
-	public Exchange(String url, String wsUrl) {
-
-		this.liveUrl = url;
-		this.wsUrl = wsUrl;
+	public String getUrl(EnvironmentType accountType) {
+		if (accountType == EnvironmentType.LIVE)
+			return liveUrl;
+		else if (accountType == EnvironmentType.TEST)
+			return testUrl;
+		else
+			throw new RuntimeException("Account type can not be determined in exchange");
 	}
-
-	public Exchange(String name) {
-		this.name = name;
+	
+	public String getWsUrl(EnvironmentType accountType) {
+		if (accountType == EnvironmentType.LIVE)
+			return liveWsUrl;
+		else if (accountType == EnvironmentType.TEST)
+			return testWsUrl;
+		else
+			throw new RuntimeException("Account type can not be determined in exchange");
 	}
 
 	public Exchange(long id) {
 		this.id = id;
 	}
 
-	public Exchange(long id, String name) {
-		this.id = id;
-		this.name = name;
-	}
+	//@formatter:off
+	public Exchange(
+			String apiKey, 
+			String secretKey, 
+			String url, 
+			String wsUrl,
+			EnvironmentType type) {
+	//@formatter:on
+		this.account = new ExchangeAccount(apiKey, secretKey, type);
+		this.liveUrl = url;
+		this.liveWsUrl = wsUrl;
 
-	public Exchange(String apiKey, String secretKey, String liveUrl, String websocketUrl) {
-		this.account = new Account(apiKey, secretKey);
-		this.liveUrl = liveUrl;
-		this.wsUrl = websocketUrl;
 	}
-	
-	
-	 
 
 }

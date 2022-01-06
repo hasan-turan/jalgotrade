@@ -5,9 +5,12 @@ import java.util.List;
 
 import tr.com.jalgo.model.exceptions.ExchangeException;
 import tr.com.jalgo.model.strategies.Strategy;
+import tr.com.jalgo.model.types.EnvironmentType;
 import tr.com.jalgo.model.types.IntervalType;
 
 public interface IExchange {
+	
+	public void start(EnvironmentType environment) throws ExchangeException;
 	
 	public Candle convertJsonStringToCandle(String message) throws ExchangeException;
 	

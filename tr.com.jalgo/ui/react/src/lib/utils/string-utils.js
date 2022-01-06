@@ -2,6 +2,7 @@ import objectUtils from "./object-utils";
  
 
 const stringUtils = {
+  
   htmlDecode: (message) => {
     const result = Array.isArray(message) ? message.join(" <br> ") : message;
     return <div> {result}</div>;
@@ -18,7 +19,7 @@ const stringUtils = {
     if (!objectUtils.isString(str))
       throw new Error("Object type is not a string");
 
-    return this.trim(str).length > 0;
+    return stringUtils.trim(str).length === 0;
   },
 };
 export default stringUtils;

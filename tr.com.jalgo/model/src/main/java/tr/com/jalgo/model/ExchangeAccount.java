@@ -6,6 +6,7 @@ import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tr.com.jalgo.model.types.EnvironmentType;
 
 /**
  * In Java, all non-static methods are by default "virtual functions." Only
@@ -16,8 +17,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "Accounts")
-public class Account extends BaseModel {
+@Table(name = "ExchangeAccounts")
+public class ExchangeAccount extends BaseModel {
 	/**
 	 * 
 	 */
@@ -30,15 +31,18 @@ public class Account extends BaseModel {
 	private String apiKey;
 
 	private String secretKey;
-
+ 
 	private String listenKey;
+	
+	private EnvironmentType type;
 
-	public Account(long id) {
+	public ExchangeAccount(long id) {
 		this.id = id;
 	}
 
-	public Account(String apiKey, String secretKey) {
+	public ExchangeAccount(String apiKey, String secretKey,EnvironmentType type) {
 		this.apiKey = apiKey;
 		this.secretKey = secretKey;
+		this.type=type;
 	}
 }

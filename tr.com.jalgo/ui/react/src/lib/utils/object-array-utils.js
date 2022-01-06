@@ -1,4 +1,7 @@
 const objectArrayUtils = {
+  sort:(arr,field)=>{
+    return arr.sort((a, b) => a[field].localeCompare(b[field]));
+  },
   toTree: (arr) => {
     var map = {},
       node,
@@ -34,7 +37,7 @@ const objectArrayUtils = {
       if (element[prop] === propValue) return element;
 
       if (element.children)
-        return ObjectArrayUtils.getItemByProp(
+        return objectArrayUtils.getItemByProp(
           element.children,
           prop,
           propValue

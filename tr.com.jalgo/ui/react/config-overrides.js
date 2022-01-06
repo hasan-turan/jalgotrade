@@ -1,12 +1,22 @@
-const { alias, configPaths } = require("react-app-rewire-alias");
+const { override, addWebpackAlias, addLessLoader } = require("customize-cra");
 const path = require("path");
-module.exports = function override(config, env) {
-  alias({
+ 
+module.exports = override(
+  addLessLoader(),
+  addWebpackAlias({
+    "@": path.resolve(__dirname, "./src/"),
     "@api": path.join(__dirname, "/src/api/"),
     "@lib": path.join(__dirname, "/src/lib/"),
-    "@utils": path.join(__dirname, "/src/lib/utils/"),
-    "@css": path.join(__dirname, "/src/assets/css/"),
-  })(config);
-  
-  return config;
-};
+    "@assets": path.join(__dirname, "/src/assets/"),
+    "@components": path.join(__dirname, "/src/components/"),
+  }),
+  (config) => {
+    config.resolve.extensions = [
+      ...config.resolve.extensions,
+      ".less",
+      ".ts",
+      ".tsx",
+    ];
+    return config;
+  }
+);

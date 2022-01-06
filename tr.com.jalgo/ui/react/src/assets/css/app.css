@@ -1,9 +1,98 @@
-html {
-  font-size: 12px;
+:root {
+  --black-color: rgba(0, 0, 0, 0.85);
+  --light-gray: rgb(223, 219, 219);
+  
+}
+.x-main-layout {
+  min-height: 100vh !important;
+  margin-top: 55px;
 }
 
-.x-splitter{
-  height: 99vh;
+.x-sider {
+  left: 0;
+  max-width: 200;
+  background: #fff !important;
+  border-right: 1px solid var(--light-gray);
+}
+.x-sider > .ant-layout-sider-trigger {
+  background: #fff !important;
+  color: var(--black-color);
+  border-right: 1px solid var(--light-gray);
 }
 
+.x-site-header {
+  border-bottom: 1px solid var(--light-gray);
+  position:fixed;
+  width:100%;
+  left:0;
+  top:0;
+  right: 0;
+  z-index: 1000;
+  height: 50px !important;
+}
+
+.x-site-footer{
+  border-top: 1px solid var(--light-gray);
+  position:fixed;
+  width:100%;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 50px !important;
+}
+.x-logo {
+  background: var(--light-gray) !important;
+}
+
+.x-site-header,
+.x-site-footer {
+  background-color: #fff !important;
+}
+
+.x-logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.x-site-header .x-trigger:hover {
+  color: #1890ff;
+}
+
+.x-main-layout{
+  position: fixed;
+  height: 100vh;
+  width: 100%;
+}
+.x-site-layout{
  
+}
+.x-site-content-layout{
+  height: 85.5vh;
+}
+.x-sider{
+  height: 85.5vh;
+}
+
+.x-sider > .ant-layout-sider-trigger{
+  position: relative;
+}
+.x-site-content {
+  padding: 5px;
+  background-color: #fff !important;
+   
+  overflow: auto;
+  
+}
+
+
+.x-parity-container{
+  overflow: auto;
+  height: 62.5vh;
+} 
+
+.x-parity-total{
+  position: fixed;
+  height: 25px;
+}

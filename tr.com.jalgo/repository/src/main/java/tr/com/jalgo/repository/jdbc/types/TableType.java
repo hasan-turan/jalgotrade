@@ -2,7 +2,7 @@ package tr.com.jalgo.repository.jdbc.types;
 
 public class TableType {
 
-	public static String ACCOUNTS = "Accounts";
+	public static String ACCOUNTS = "ExchangeAccounts";
 	public static String ASSETS = "Assets";
 	public static String CANDLES = "Candles";
 	public static String DATASOURCES = "DataSources";
